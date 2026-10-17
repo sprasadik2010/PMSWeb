@@ -6,16 +6,17 @@ from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from sqlalchemy import func
 import bcrypt
+import os
 
 
 from database import get_db
-from ..schemas import Token, UserCreate
+from ..schemas import Token, UserCreate, UserResponse
 from ..models import User
 
 # Configuration
-SECRET_KEY = "your-secret-key-change-this-in-production"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 30
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", str(60 * 24 * 30)))
 
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -131,11 +132,15 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     
     return {"message": "User created successfully !"}
 
-@router.get("/me")
+def get_tenant_id(user: User) -> int:
+    """Returns the effective clinic account ID (tenant ID) for either the clinic owner or a staff member."""
+    return user.parent_user_id if user.parent_user_id else user.id
+
+@router.get("/me", response_model=UserResponse)
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-@router.post("/upgrade")
+@router.post("/upgrade", response_model=UserResponse)
 async def upgrade_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     current_user.ad_free = True
     current_user.subscription_tier = "premium"
@@ -143,7 +148,7 @@ async def upgrade_user(current_user: User = Depends(get_current_user), db: Sessi
     db.refresh(current_user)
     return current_user
 
-@router.post("/downgrade")
+@router.post("/downgrade", response_model=UserResponse)
 async def downgrade_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     current_user.ad_free = False
     current_user.subscription_tier = "free"

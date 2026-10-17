@@ -6,18 +6,21 @@ from datetime import datetime
 import random
 
 from database import get_db
-from .auth import get_current_user
+from .auth import get_current_user, get_tenant_id
 from ..models import OPBill, OPBillItem, IPBill, IPBillItem, Patient, Doctor
 from ..schemas import OPBillCreate, IPBillCreate
 
 router = APIRouter(prefix="/bills", tags=["bills"])
 
 
-def generate_bill_number(prefix: str = "B"):
-    current_date = datetime.now()
-    date_str = current_date.strftime("%Y%m%d")
-    sequence = random.randint(1, 9999)
-    return f"{prefix}{date_str}-{sequence:04d}"
+def generate_bill_number(db: Session, tenant_id: int, prefix: str = "OPB") -> str:
+    current_year = datetime.now().strftime("%Y")
+    if prefix.startswith("OP"):
+        count = db.query(OPBill).filter(OPBill.user_id == tenant_id).count()
+        return f"OPB-{current_year}-{(count + 1):05d}"
+    else:
+        count = db.query(IPBill).filter(IPBill.user_id == tenant_id).count()
+        return f"IPB-{current_year}-{(count + 1):05d}"
 
 
 @router.post("/op")
@@ -26,15 +29,16 @@ async def create_op_bill(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    patient = db.query(Patient).filter(Patient.id == bill_data.patient_id, Patient.user_id == current_user.id).first()
+    tenant_id = get_tenant_id(current_user)
+    patient = db.query(Patient).filter(Patient.id == bill_data.patient_id, Patient.user_id == tenant_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    doctor = db.query(Doctor).filter(Doctor.id == bill_data.doctor_id, Doctor.user_id == current_user.id).first()
+    doctor = db.query(Doctor).filter(Doctor.id == bill_data.doctor_id, Doctor.user_id == tenant_id).first()
     if not doctor:
         raise HTTPException(status_code=404, detail="Doctor not found")
 
-    bill_number = generate_bill_number("OP")
+    bill_number = generate_bill_number(db, tenant_id, "OPB")
 
     total_amount = 0
     discount_amount = 0
@@ -75,7 +79,7 @@ async def create_op_bill(
         discount_amount=discount_amount,
         net_amount=net_amount,
         created_by=current_user.full_name,
-        user_id=current_user.id,
+        user_id=tenant_id,
         items=bill_items
     )
 
@@ -96,15 +100,16 @@ async def create_ip_bill(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    patient = db.query(Patient).filter(Patient.id == bill_data.patient_id, Patient.user_id == current_user.id).first()
+    tenant_id = get_tenant_id(current_user)
+    patient = db.query(Patient).filter(Patient.id == bill_data.patient_id, Patient.user_id == tenant_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    doctor = db.query(Doctor).filter(Doctor.id == bill_data.doctor_id, Doctor.user_id == current_user.id).first()
+    doctor = db.query(Doctor).filter(Doctor.id == bill_data.doctor_id, Doctor.user_id == tenant_id).first()
     if not doctor:
         raise HTTPException(status_code=404, detail="Doctor not found")
 
-    bill_number = generate_bill_number("IP")
+    bill_number = generate_bill_number(db, tenant_id, "IPB")
 
     total_amount = 0
     discount_amount = 0
@@ -154,7 +159,7 @@ async def create_ip_bill(
         she_education_cess=bill_data.she_education_cess,
         net_amount=net_amount,
         created_by=current_user.full_name,
-        user_id=current_user.id,
+        user_id=tenant_id,
         items=bill_items
     )
 

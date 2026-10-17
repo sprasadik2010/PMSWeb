@@ -17,6 +17,8 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     ad_free = Column(Boolean, default=False)
     subscription_tier = Column(String(20), default="free")
+    parent_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id"), nullable=True)
 
 class Ad(Base):
     __tablename__ = "ads"
@@ -62,6 +64,8 @@ class Doctor(Base):
     patients = relationship("Patient", back_populates="doctor")
     op_bills = relationship("OPBill", back_populates="doctor")
     ip_bills = relationship("IPBill", back_populates="doctor")
+    prescriptions = relationship("Prescription", back_populates="doctor")
+    appointments = relationship("Appointment", back_populates="doctor")
 
 class Patient(Base):
     __tablename__ = "patients"
@@ -90,6 +94,9 @@ class Patient(Base):
     doctor = relationship("Doctor", back_populates="patients")
     op_bills = relationship("OPBill", back_populates="patient")
     ip_bills = relationship("IPBill", back_populates="patient")
+    prescriptions = relationship("Prescription", back_populates="patient")
+    appointments = relationship("Appointment", back_populates="patient")
+    discharge_summaries = relationship("DischargeSummary", back_populates="patient")
 
 class OPBill(Base):
     __tablename__ = "op_bills"
@@ -199,3 +206,128 @@ class Particular(Base):
     ipdefault = Column(Boolean, default=False)
     sortorder = Column(Integer, default=-1)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class ClinicSetting(Base):
+    __tablename__ = "clinic_settings"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
+    clinic_name = Column(String(150), default="City Care Hospital & Research Center")
+    tagline = Column(String(200), default="Advanced Healthcare & Compassionate Service")
+    address = Column(Text, default="123 Hospital Road, Central Medical Enclave")
+    city = Column(String(100), default="Metro City")
+    state = Column(String(100), default="State")
+    postal_code = Column(String(20), default="500001")
+    phone = Column(String(50), default="+91 98765 43210")
+    email = Column(String(100), default="info@citycarehospital.com")
+    tax_id = Column(String(50), default="GSTIN36AAAAA0000A1Z5")
+    currency_symbol = Column(String(10), default="₹")
+    logo_url = Column(String(300), nullable=True)
+    terms_conditions = Column(Text, default="1. Fees once paid are non-refundable.\n2. Consultation valid for 7 days from issue date.\n3. Please bring this receipt for all follow-up visits.")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Medicine(Base):
+    __tablename__ = "medicines"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    brand_name = Column(String(150), index=True)
+    generic_name = Column(String(150), nullable=True)
+    category = Column(String(50), default="Tablet")  # Tablet, Syrup, Capsule, Injection, Ointment, Drops
+    strength = Column(String(50), nullable=True)     # e.g. 500mg, 250mg, 10ml
+    default_dosage = Column(String(50), default="1 tablet")
+    default_frequency = Column(String(50), default="1-0-1")
+    default_duration = Column(String(50), default="5 days")
+    default_instruction = Column(String(100), default="After Food")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Prescription(Base):
+    __tablename__ = "prescriptions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    prescription_number = Column(String(50), index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"))
+    doctor_id = Column(Integer, ForeignKey("doctors.id"))
+    date = Column(DateTime, default=datetime.utcnow)
+    
+    # Vitals
+    bp_systolic = Column(Integer, nullable=True)
+    bp_diastolic = Column(Integer, nullable=True)
+    pulse = Column(Integer, nullable=True)
+    temperature = Column(Float, nullable=True)
+    weight_kg = Column(Float, nullable=True)
+    height_cm = Column(Float, nullable=True)
+    spo2 = Column(Integer, nullable=True)
+    blood_sugar = Column(Float, nullable=True)
+    
+    # Clinical findings
+    chief_complaint = Column(Text, nullable=True)
+    diagnosis = Column(Text, nullable=True)
+    clinical_notes = Column(Text, nullable=True)
+    advice = Column(Text, nullable=True)
+    investigations_advised = Column(Text, nullable=True)
+    follow_up_date = Column(Date, nullable=True)
+    created_by = Column(String(100), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    patient = relationship("Patient", back_populates="prescriptions")
+    doctor = relationship("Doctor", back_populates="prescriptions")
+    items = relationship("PrescriptionItem", back_populates="prescription", cascade="all, delete-orphan")
+
+class PrescriptionItem(Base):
+    __tablename__ = "prescription_items"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    prescription_id = Column(Integer, ForeignKey("prescriptions.id"))
+    medicine_name = Column(String(200))
+    dosage = Column(String(50))           # e.g. 500 mg, 1 tablet
+    frequency = Column(String(50))        # 1-0-1, 1-1-1, 1-0-0
+    duration = Column(String(50))         # 3 days, 5 days
+    instruction = Column(String(100))     # After food, Before food
+    route = Column(String(50), default="Oral") # Oral, IV, Topical
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    prescription = relationship("Prescription", back_populates="items")
+
+class Appointment(Base):
+    __tablename__ = "appointments"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    appointment_number = Column(String(50), index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"))
+    doctor_id = Column(Integer, ForeignKey("doctors.id"))
+    appointment_date = Column(Date, default=date.today)
+    time_slot = Column(String(20), default="10:00 AM")
+    token_number = Column(Integer, default=1)
+    status = Column(String(30), default="waiting") # waiting, in_consultation, completed, cancelled
+    chief_complaint = Column(String(255), nullable=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    patient = relationship("Patient", back_populates="appointments")
+    doctor = relationship("Doctor", back_populates="appointments")
+
+class DischargeSummary(Base):
+    __tablename__ = "discharge_summaries"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    summary_number = Column(String(50), index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"))
+    doctor_id = Column(Integer, ForeignKey("doctors.id"))
+    admission_date = Column(Date)
+    discharge_date = Column(Date)
+    final_diagnosis = Column(Text)
+    treatment_summary = Column(Text)
+    condition_at_discharge = Column(String(100), default="Stable and Recovered")
+    discharge_medications = Column(Text, nullable=True)
+    follow_up_instructions = Column(Text, nullable=True)
+    created_by = Column(String(100), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    patient = relationship("Patient", back_populates="discharge_summaries")
+    doctor = relationship("Doctor")

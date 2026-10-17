@@ -887,17 +887,51 @@ const Reports = () => {
   };
 
   const handleExport = () => {
-    if (!reportData) return
+    if (!reportData) {
+      toast.error('No report data to export')
+      return
+    }
 
-    const dataStr = JSON.stringify(reportData, null, 2)
-    const dataBlob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(dataBlob)
+    let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
+    let filename = `${activeReport}-${format(new Date(), 'yyyy-MM-dd')}.csv`
+
+    if (activeReport === 'daily-op') {
+      const rows = Array.isArray(reportData) ? reportData : []
+      csvContent += 'Bill Number,Patient Name,Age,Gender,Doctor,Bill Date,Total Amount,Discount,Net Amount\n'
+      rows.forEach((bill: any) => {
+        csvContent += `"${bill.bill_number}","${bill.patient?.name || ''}","${bill.patient?.age || ''}","${bill.patient?.gender || ''}","${bill.doctor?.name || ''}","${bill.bill_date}","${bill.total_amount}","${bill.discount_amount}","${bill.net_amount}"\n`
+      })
+    } else if (activeReport === 'bill-summary') {
+      const data = reportData as ReportData
+      csvContent += 'Bill Number,Type,Patient,Phone,Date,Amount\n'
+      const allBills = [...(data.op_bills || []), ...(data.ip_bills || [])]
+      allBills.forEach((b: any) => {
+        const type = b.bill_number?.startsWith('OP') ? 'OP' : 'IP'
+        csvContent += `"${b.bill_number}","${type}","${b.patient?.name || ''}","${b.patient?.phone || ''}","${b.bill_date}","${b.net_amount}"\n`
+      })
+    } else if (activeReport === 'patient-list') {
+      const pts = Array.isArray(reportData) ? reportData : []
+      csvContent += 'OP Number,IP Number,Name,Age,Gender,Phone,Place,Registration Date\n'
+      pts.forEach((p: any) => {
+        csvContent += `"${p.op_number || ''}","${p.ip_number || ''}","${p.name || ''}","${p.age || ''}","${p.gender || ''}","${p.phone || ''}","${p.place || ''}","${p.registration_date || ''}"\n`
+      })
+    } else {
+      csvContent += 'Particular,Department,Amount\n'
+      const data = reportData as ReportData
+      const items = [...(data.op_details || []), ...(data.ip_details || [])]
+      items.forEach((it: any) => {
+        csvContent += `"${it.particular || ''}","${it.department || ''}","${it.total_amount || 0}"\n`
+      })
+    }
+
+    const encodedUri = encodeURI(csvContent)
     const link = document.createElement('a')
-    link.href = url
-    link.download = `${activeReport}-${format(new Date(), 'yyyy-MM-dd')}.json`
+    link.setAttribute('href', encodedUri)
+    link.setAttribute('download', filename)
+    document.body.appendChild(link)
     link.click()
-    URL.revokeObjectURL(url)
-    toast.success('Report exported successfully')
+    document.body.removeChild(link)
+    toast.success('Report exported to CSV successfully!')
   }
 
   const renderParticularsReport = () => {

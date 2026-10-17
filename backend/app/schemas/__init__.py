@@ -9,7 +9,14 @@ from .schemas import (
     OPBillItemCreate, OPBillItemResponse,
     IPBillItemCreate, IPBillItemResponse,
     DepartmentBase, DepartmentCreate, DepartmentResponse,
-    ParticularBase, ParticularCreate, ParticularResponse
+    ParticularBase, ParticularCreate, ParticularResponse,
+    ClinicSettingBase, ClinicSettingUpdate, ClinicSettingResponse,
+    MedicineBase, MedicineCreate, MedicineResponse,
+    PrescriptionItemCreate, PrescriptionItemResponse,
+    PrescriptionCreate, PrescriptionResponse,
+    AppointmentCreate, AppointmentUpdate, AppointmentResponse,
+    DischargeSummaryCreate, DischargeSummaryResponse,
+    StaffCreate, StaffResponse
 )
 
 __all__ = [
@@ -23,5 +30,12 @@ __all__ = [
     "OPBillItemCreate", "OPBillItemResponse",
     "IPBillItemCreate", "IPBillItemResponse",
     "DepartmentBase", "DepartmentCreate", "DepartmentResponse",
-    "ParticularBase", "ParticularCreate", "ParticularResponse"
+    "ParticularBase", "ParticularCreate", "ParticularResponse",
+    "ClinicSettingBase", "ClinicSettingUpdate", "ClinicSettingResponse",
+    "MedicineBase", "MedicineCreate", "MedicineResponse",
+    "PrescriptionItemCreate", "PrescriptionItemResponse",
+    "PrescriptionCreate", "PrescriptionResponse",
+    "AppointmentCreate", "AppointmentUpdate", "AppointmentResponse",
+    "DischargeSummaryCreate", "DischargeSummaryResponse",
+    "StaffCreate", "StaffResponse"
 ]

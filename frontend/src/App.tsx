@@ -13,6 +13,11 @@ import SelectPatient from './components/SelectPatient'
 import Settings from './pages/Settings'
 import PricingUpgrade from './pages/PricingUpgrade'
 import AdminPanel from './pages/AdminPanel'
+import Prescriptions from './pages/Prescriptions'
+import Appointments from './pages/Appointments'
+import DischargeSummaries from './pages/DischargeSummaries'
+import ClinicSettings from './pages/ClinicSettings'
+import StaffManagement from './pages/StaffManagement'
 
 function App() {
   return (
@@ -30,7 +35,12 @@ function App() {
             <Route path="doctor/master" element={<DoctorMaster />} />
             <Route path="billing/op" element={<OPBillEntry />} />
             <Route path="billing/ip" element={<IPBillEntry />} />
+            <Route path="prescriptions" element={<Prescriptions />} />
+            <Route path="appointments" element={<Appointments />} />
+            <Route path="discharge-summaries" element={<DischargeSummaries />} />
             <Route path="reports" element={<Reports />} />
+            <Route path="clinic-branding" element={<ClinicSettings />} />
+            <Route path="staff-management" element={<StaffManagement />} />
             <Route path="settings" element={<Settings />} />
             <Route path="upgrade" element={<PricingUpgrade />} />
             <Route path="admin" element={<AdminPanel />} />

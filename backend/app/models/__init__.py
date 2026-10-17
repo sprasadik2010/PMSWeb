@@ -1,4 +1,9 @@
-from .models import Base, User, Ad, Doctor, Patient, OPBill, OPBillItem, IPBill, IPBillItem, Department, Particular
+from .models import (
+    Base, User, Ad, Doctor, Patient, OPBill, OPBillItem, 
+    IPBill, IPBillItem, Department, Particular,
+    ClinicSetting, Medicine, Prescription, PrescriptionItem, 
+    Appointment, DischargeSummary
+)
 
 __all__ = [
     "Base",
@@ -12,4 +17,10 @@ __all__ = [
     "IPBillItem",
     "Department",
     "Particular",
+    "ClinicSetting",
+    "Medicine",
+    "Prescription",
+    "PrescriptionItem",
+    "Appointment",
+    "DischargeSummary"
 ]

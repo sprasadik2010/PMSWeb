@@ -5,7 +5,12 @@ from datetime import datetime
 import os
 
 from database import create_tables
-from .routers import auth, patients, doctors, bills, dashboard, reports, seeder, settings, ads, admin
+from .routers import (
+    auth, patients, doctors, bills, dashboard, reports, 
+    seeder, settings, ads, admin, prescriptions, 
+    medicines, appointments, clinic_settings, 
+    discharge_summaries, staff
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -14,33 +19,22 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="Patient Management System - Lite",
-    description="Basic Patient Management System with OP/IP support",
-    version="1.0.0",
+    title="Patient Management System - Pro SaaS",
+    description="Comprehensive Clinic & Hospital Management System with EMR, Billing, Appointments, and Multi-Tenancy",
+    version="2.0.0",
     lifespan=lifespan
 )
 
 # Configure CORS
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=[
-#         "http://localhost:5173",      # React dev
-#         "https://citynh.onrender.com", # Deploy
-#         "tauri://localhost",          # Tauri desktop
-#         "app://localhost",
-#         "app://-",                    # Some webview runtimes
-#         "http://127.0.0.1:5173",
-#         "http://localhost",
-#         "http://127.0.0.1",
-#     ],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:8000"
+    ],
+    allow_origin_regex=r"^https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,6 +51,12 @@ app.include_router(seeder.router)
 app.include_router(settings.router)
 app.include_router(ads.router)
 app.include_router(admin.router)
+app.include_router(prescriptions.router)
+app.include_router(medicines.router)
+app.include_router(appointments.router)
+app.include_router(clinic_settings.router)
+app.include_router(discharge_summaries.router)
+app.include_router(staff.router)
 
 @app.get("/")
 async def root():

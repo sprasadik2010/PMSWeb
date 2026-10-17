@@ -6,24 +6,21 @@ from datetime import datetime
 import random
 
 from database import get_db
-from .auth import get_current_user
+from .auth import get_current_user, get_tenant_id
 from ..models import Patient, Doctor
 from ..schemas import PatientCreate, PatientResponse
 
 router = APIRouter(prefix="/patients", tags=["patients"])
 
-def generate_op_number():
-    current_date = datetime.now()
-    year_month = current_date.strftime("%Y%m")
-    # In real implementation, you would query the database for the last number
-    sequence = random.randint(1, 999999)
-    return f"{year_month}-{sequence:06d}"
+def generate_op_number(db: Session, tenant_id: int) -> str:
+    current_year = datetime.now().strftime("%Y")
+    count = db.query(Patient).filter(Patient.user_id == tenant_id).count()
+    return f"OP-{current_year}-{(count + 1):05d}"
 
-def generate_ip_number():
-    current_date = datetime.now()
-    year_month = current_date.strftime("%Y%m")
-    sequence = random.randint(1, 999999)
-    return f"{year_month}-{sequence:06d}"
+def generate_ip_number(db: Session, tenant_id: int) -> str:
+    current_year = datetime.now().strftime("%Y")
+    count = db.query(Patient).filter(Patient.user_id == tenant_id, Patient.is_ip == True).count()
+    return f"IP-{current_year}-{(count + 1):05d}"
 
 @router.post("/", response_model=PatientResponse)
 async def create_patient(
@@ -31,14 +28,14 @@ async def create_patient(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    # Generate OP number
-    op_number = generate_op_number()
+    tenant_id = get_tenant_id(current_user)
     
-    # Generate IP number if it's an IP registration
-    ip_number = generate_ip_number() if patient_data.is_ip else None
+    # Generate sequential numbers
+    op_number = generate_op_number(db, tenant_id)
+    ip_number = generate_ip_number(db, tenant_id) if patient_data.is_ip else None
     
     # Get doctor name
-    doctor = db.query(Doctor).filter(Doctor.id == patient_data.doctor_id, Doctor.user_id == current_user.id).first()
+    doctor = db.query(Doctor).filter(Doctor.id == patient_data.doctor_id, Doctor.user_id == tenant_id).first()
     if not doctor:
         raise HTTPException(status_code=404, detail="Doctor not found")
     
@@ -46,7 +43,7 @@ async def create_patient(
         **patient_data.dict(),
         op_number=op_number,
         ip_number=ip_number,
-        user_id=current_user.id,
+        user_id=tenant_id,
         created_by=current_user.full_name
     )
     

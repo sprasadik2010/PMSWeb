@@ -17,7 +17,11 @@ import {
   User,
   MoreVertical,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  Calendar,
+  FileCheck2,
+  Building2,
+  Users
 } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
@@ -40,6 +44,20 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       color: 'from-blue-500 to-cyan-500'
     },
     { 
+      path: '/appointments', 
+      label: 'Appointments & Queue', 
+      icon: Calendar,
+      description: 'Token queue & TV mode',
+      color: 'from-emerald-500 to-teal-500'
+    },
+    { 
+      path: '/prescriptions', 
+      label: 'Consultation & Rx', 
+      icon: Stethoscope,
+      description: 'Diagnosis & Prescriptions',
+      color: 'from-blue-600 to-indigo-600'
+    },
+    { 
       path: '/billing/op', 
       label: 'OP Billing', 
       icon: FileText,
@@ -54,6 +72,13 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       color: 'from-red-500 to-pink-500'
     },
     { 
+      path: '/discharge-summaries', 
+      label: 'Discharge Summaries', 
+      icon: FileCheck2,
+      description: 'Inpatient discharge notes',
+      color: 'from-purple-600 to-pink-600'
+    },
+    { 
       path: '/patient/registration', 
       label: 'Patient Registration', 
       icon: UserPlus,
@@ -63,20 +88,34 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     { 
       path: '/doctor/master', 
       label: 'Doctor Master', 
-      icon: Stethoscope,
+      icon: User,
       description: 'Manage doctors',
       color: 'from-purple-500 to-indigo-500'
     },
     { 
       path: '/reports', 
-      label: 'Reports', 
+      label: 'Reports & Export', 
       icon: BarChart3,
-      description: 'Analytics & reports',
+      description: 'Analytics & CSV export',
       color: 'from-indigo-500 to-purple-500'
     },
     { 
+      path: '/clinic-branding', 
+      label: 'Clinic Profile', 
+      icon: Building2,
+      description: 'Hospital branding & tax ID',
+      color: 'from-slate-600 to-gray-800'
+    },
+    { 
+      path: '/staff-management', 
+      label: 'Staff & Roles (RBAC)', 
+      icon: Users,
+      description: 'Manage clinic staff logins',
+      color: 'from-teal-600 to-cyan-700'
+    },
+    { 
       path: '/settings', 
-      label: 'Settings', 
+      label: 'Master Settings', 
       icon: Settings,
       description: 'Particulars & Departments',
       color: 'from-gray-600 to-gray-800'

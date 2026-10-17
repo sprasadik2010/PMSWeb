@@ -25,7 +25,13 @@ export default defineConfig(({ mode }) => {
         '/reports': { target: backendUrl, changeOrigin: true, secure: false },
         '/settings': { target: backendUrl, changeOrigin: true, secure: false },
         '/ads': { target: backendUrl, changeOrigin: true, secure: false },
-        '/admin': { target: backendUrl, changeOrigin: true, secure: false }
+        '/admin': { target: backendUrl, changeOrigin: true, secure: false },
+        '/prescriptions': { target: backendUrl, changeOrigin: true, secure: false },
+        '/medicines': { target: backendUrl, changeOrigin: true, secure: false },
+        '/appointments': { target: backendUrl, changeOrigin: true, secure: false },
+        '/clinic-settings': { target: backendUrl, changeOrigin: true, secure: false },
+        '/discharge-summaries': { target: backendUrl, changeOrigin: true, secure: false },
+        '/staff': { target: backendUrl, changeOrigin: true, secure: false }
       }
     },
     define: {
