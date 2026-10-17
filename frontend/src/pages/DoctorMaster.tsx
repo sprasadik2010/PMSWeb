@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Save, Trash2, Plus, Edit, X, Search, Phone, Mail, Clock, BriefcaseMedical, Stethoscope, User } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface Department{  
   id?: number
@@ -280,22 +281,26 @@ const [formData, setFormData] = useState<Doctor>({
       {/* Doctor Form Section */}
       {showForm && (
         <div className="bg-white rounded-xl shadow-lg border border-gray-200">
-          <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white">
-            <div className="flex items-center justify-between">
+          <div className="p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                  {isEditing ? '✏️ Edit Doctor Details' : '➕ Add New Doctor'}
+                  <span>{isEditing ? '✏️ Edit Doctor Details' : '➕ Add New Doctor'}</span>
                 </h2>
-                <p className="text-gray-600 mt-1">
+                <p className="text-gray-600 mt-1 text-sm">
                   {isEditing ? 'Update doctor information' : 'Fill in the details to add a new doctor'}
                 </p>
               </div>
-              <button
-                onClick={resetForm}
-                className="btn-secondary hover:bg-gray-200"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                <VoiceSwitch compact label="Voice Typing" />
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="btn-secondary hover:bg-gray-200 p-2"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -625,20 +630,20 @@ const [formData, setFormData] = useState<Doctor>({
             </div>
 
             {/* Form Actions */}
-            <div className="flex justify-end space-x-3 pt-6 border-t">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t">
               <button
                 type="button"
                 onClick={resetForm}
-                className="px-6 py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="w-full sm:w-auto px-6 py-2.5 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer text-center"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center shadow-md"
+                className="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-md cursor-pointer"
               >
-                <Save size={20} className="mr-2" />
+                <Save size={18} className="mr-2" />
                 {isLoading ? 'Saving...' : (isEditing ? 'Update Doctor' : 'Save Doctor')}
               </button>
             </div>
@@ -648,14 +653,17 @@ const [formData, setFormData] = useState<Doctor>({
 
       {/* Doctor List Section */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-6">
+        <div className="p-4 sm:p-6 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
               <h2 className="text-xl font-bold text-gray-900">Doctor Directory</h2>
-              <p className="text-gray-600 mt-1">Search and manage all hospital doctors</p>
+              <p className="text-gray-600 mt-1 text-sm">Search and manage all hospital doctors</p>
             </div>
-            <div className="text-lg font-semibold text-gray-900">
-              Total: <span className="text-blue-600">{filteredDoctors.length}</span> doctors
+            <div className="flex items-center gap-3">
+              <VoiceSwitch compact label="Voice Search" />
+              <div className="text-sm font-semibold text-gray-700 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100">
+                Total: <span className="text-blue-600 font-bold">{filteredDoctors.length}</span> doctors
+              </div>
             </div>
           </div>
 
@@ -667,7 +675,7 @@ const [formData, setFormData] = useState<Doctor>({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search doctors by name, code, specialty, department, or phone..."
-              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
             />
           </div>
         </div>

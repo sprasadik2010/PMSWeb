@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Settings, Plus, Trash2, Building, Tag, X, RefreshCw, Check } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { VoiceSwitch } from '../components/VoiceFloatingBar';
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
 
@@ -172,21 +173,24 @@ const SettingsPage: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                <Settings className="text-blue-600" size={28} />
-                Settings
+                <Settings className="text-blue-600 shrink-0" size={28} />
+                <span>Settings</span>
               </h1>
-              <p className="text-gray-600 mt-1">Manage departments and particulars</p>
+              <p className="text-gray-600 mt-1 text-sm">Manage departments and particulars</p>
             </div>
-            <button
-              onClick={loadData}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200"
-            >
-              <RefreshCw size={18} />
-              Refresh
-            </button>
+            <div className="flex items-center gap-3">
+              <VoiceSwitch compact label="Voice Typing" />
+              <button
+                onClick={loadData}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 cursor-pointer text-sm font-medium"
+              >
+                <RefreshCw size={16} />
+                Refresh
+              </button>
+            </div>
           </div>
 
           {/* Stats */}

@@ -19,35 +19,41 @@ import DischargeSummaries from './pages/DischargeSummaries'
 import ClinicSettings from './pages/ClinicSettings'
 import StaffManagement from './pages/StaffManagement'
 
+import { VoiceProvider } from './contexts/VoiceContext'
+import { VoiceFloatingBar } from './components/VoiceFloatingBar'
+
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Toaster position="top-right" />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          
-          {/* All protected routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="patient/registration" element={<PatientRegistration />} />
-            <Route path="doctor/master" element={<DoctorMaster />} />
-            <Route path="billing/op" element={<OPBillEntry />} />
-            <Route path="billing/ip" element={<IPBillEntry />} />
-            <Route path="prescriptions" element={<Prescriptions />} />
-            <Route path="appointments" element={<Appointments />} />
-            <Route path="discharge-summaries" element={<DischargeSummaries />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="clinic-branding" element={<ClinicSettings />} />
-            <Route path="staff-management" element={<StaffManagement />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="upgrade" element={<PricingUpgrade />} />
-            <Route path="admin" element={<AdminPanel />} />
-            <Route path="select-patient" element={<SelectPatient />} />
-          </Route>
-        </Routes>
-      </AuthProvider>
+      <VoiceProvider>
+        <AuthProvider>
+          <Toaster position="top-right" />
+          <VoiceFloatingBar />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            
+            {/* All protected routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="patient/registration" element={<PatientRegistration />} />
+              <Route path="doctor/master" element={<DoctorMaster />} />
+              <Route path="billing/op" element={<OPBillEntry />} />
+              <Route path="billing/ip" element={<IPBillEntry />} />
+              <Route path="prescriptions" element={<Prescriptions />} />
+              <Route path="appointments" element={<Appointments />} />
+              <Route path="discharge-summaries" element={<DischargeSummaries />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="clinic-branding" element={<ClinicSettings />} />
+              <Route path="staff-management" element={<StaffManagement />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="upgrade" element={<PricingUpgrade />} />
+              <Route path="admin" element={<AdminPanel />} />
+              <Route path="select-patient" element={<SelectPatient />} />
+            </Route>
+          </Routes>
+        </AuthProvider>
+      </VoiceProvider>
     </Router>
   )
 }

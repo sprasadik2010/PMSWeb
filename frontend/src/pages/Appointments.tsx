@@ -11,6 +11,7 @@ import {
   Bell,
   X
 } from 'lucide-react'
+import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface Appointment {
   id: number
@@ -162,7 +163,8 @@ export const Appointments: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <VoiceSwitch compact label="Voice Typing" />
           <button
             onClick={() => setShowTvMode(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold rounded-xl text-sm shadow-md transition-all cursor-pointer"
@@ -396,9 +398,12 @@ export const Appointments: React.FC = () => {
             <form onSubmit={handleBookAppointment} className="space-y-4">
               {/* Patient Search */}
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                  Patient <span className="text-red-500">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-gray-700 uppercase">
+                    Patient <span className="text-red-500">*</span>
+                  </label>
+                  <VoiceSwitch compact label="Voice" />
+                </div>
                 <div className="relative">
                   <input
                     type="text"

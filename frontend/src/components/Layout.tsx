@@ -26,6 +26,7 @@ import {
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { AdBanner } from './AdBanner'
+import { VoiceSwitch } from './VoiceFloatingBar'
 
 const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth()
@@ -294,27 +295,9 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
-              {/* Search Bar */}
-              {/* <div className="hidden md:flex items-center bg-gray-100 rounded-xl px-4 py-2 min-w-[300px]">
-                <Search size={18} className="text-gray-500 mr-2" />
-                <input
-                  type="text"
-                  placeholder="Search patients, bills, reports..."
-                  className="bg-transparent border-none outline-none w-full text-gray-700 placeholder-gray-500"
-                />
-              </div> */}
-
-              {/* Notifications */}
-              {/* <button 
-                onClick={() => setIsNotificationsOpen(true)}
-                className="p-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all relative"
-              >
-                <Bell size={20} className="text-gray-700" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  3
-                </span>
-              </button> */}
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              {/* Universal Free Voice-to-Text Switch */}
+              <VoiceSwitch label="Voice Dictation" />
 
               {/* User Menu */}
               <div className="relative">

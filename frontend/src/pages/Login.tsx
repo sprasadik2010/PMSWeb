@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { Hospital, Lock, User, HeartPulse, Shield, Stethoscope, Building, Activity } from 'lucide-react'
 import toast from 'react-hot-toast'
 import axios from 'axios'
+import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 const Login = () => {
   const [username, setUsername] = useState('')
@@ -124,6 +125,10 @@ const Login = () => {
               </div>
               <h2 className="text-3xl font-bold text-gray-900">{isSignUp ? 'Create Clinic Workspace' : 'Secure Login'}</h2>
               <p className="text-gray-600 mt-2">{isSignUp ? 'Start managing your OP/IP clinic today' : 'Access your patient management dashboard'}</p>
+            </div>
+
+            <div className="flex justify-end mb-4">
+              <VoiceSwitch compact label="Voice Typing" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">

@@ -5,6 +5,7 @@ import { X, Search, Building, CalendarClock, User, Loader2, Users, ChevronDown, 
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import type { AxiosError } from 'axios'
+import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface BillItem {
   particular: string
@@ -1232,7 +1233,7 @@ setBillItems(initialBillItems);
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-cyan-700 text-white px-6 py-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center space-x-3">
             <Building size={24} />
             <div>
@@ -1243,12 +1244,15 @@ setBillItems(initialBillItems);
               </div>
             </div>
           </div>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded text-sm"
-          >
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2">
+            <VoiceSwitch compact label="Voice Typing" />
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded text-sm cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1259,10 +1263,13 @@ setBillItems(initialBillItems);
           <div className="bg-white rounded-lg shadow border border-gray-200">
             <div className="p-3 border-b border-gray-200 bg-blue-50">
               <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-gray-900 flex items-center">
-                  <Search className="mr-2" size={18} />
-                  Search OP Patient
-                </h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="font-semibold text-gray-900 flex items-center">
+                    <Search className="mr-2" size={18} />
+                    Search OP Patient
+                  </h2>
+                  <VoiceSwitch compact label="Voice Search" />
+                </div>
                 <button
                   onClick={() => setShowSearchResults(!showSearchResults)}
                   className="text-sm text-blue-600 flex items-center"

@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Sparkles
 } from 'lucide-react'
+import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 export const ClinicSettings: React.FC = () => {
   const [saving, setSaving] = useState(false)
@@ -70,6 +71,7 @@ export const ClinicSettings: React.FC = () => {
             Configure your official clinic letterhead, billing header, contact details, and tax registration
           </p>
         </div>
+        <VoiceSwitch compact label="Voice Typing" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

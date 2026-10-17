@@ -5,6 +5,7 @@ import { Save, X, Search, Trash2, User, Phone, MapPin, /*CalendarClock,*/ Buildi
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import type { AxiosError } from 'axios'
+import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface Doctor {
   id: number
@@ -295,24 +296,27 @@ const PatientRegistration = () => {
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header with Stats - Matching DoctorMaster */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-              <UserPlus className="mr-3 text-blue-600" size={28} />
-              Patient Registration
+              <UserPlus className="mr-3 text-blue-600 shrink-0" size={28} />
+              <span>Patient Registration</span>
             </h1>
-            <p className="text-gray-600 mt-1">Register new patients for outpatient or inpatient services</p>
+            <p className="text-gray-600 mt-1 text-sm">Register new patients for outpatient or inpatient services</p>
           </div>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg shadow-md"
-          >
-            <X size={20} className="mr-2" />
-            Back to Dashboard
-          </button>
+          <div className="flex items-center gap-2">
+            <VoiceSwitch compact label="Voice Typing" />
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 sm:px-4 py-2 rounded-xl shadow-md text-sm font-medium"
+            >
+              <X size={18} className="mr-1.5" />
+              <span>Dashboard</span>
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg mr-3">
@@ -391,28 +395,29 @@ const PatientRegistration = () => {
 
       {/* Main Form Section - Matching DoctorMaster */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-200">
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white">
-          <div className="flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                <UserPlus className="mr-2 text-blue-600" size={24} />
-                Patient Information
+                <UserPlus className="mr-2 text-blue-600 shrink-0" size={24} />
+                <span>Patient Information</span>
               </h2>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 mt-1 text-sm">
                 Fill in the patient details for {isIP ? 'inpatient admission' : 'outpatient consultation'}
               </p>
             </div>
             
             {/* Search Patients Section */}
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <div className="flex flex-wrap items-center gap-2">
+              <VoiceSwitch compact label="Voice Typing" />
+              <div className="relative flex-1 sm:w-64 min-w-[180px]">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearchPatients()}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                  className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   placeholder="Search existing patients..."
                 />
               </div>
@@ -420,7 +425,8 @@ const PatientRegistration = () => {
                 type="button"
                 onClick={handleSearchPatients}
                 disabled={isSearching}
-                className="btn-secondary hover:bg-gray-200 px-3"
+                className="btn-secondary px-3"
+                title="Search Patients"
               >
                 {isSearching ? (
                   <Loader2 className="animate-spin" size={18} />
@@ -432,7 +438,8 @@ const PatientRegistration = () => {
                 type="button"
                 onClick={handleShowAllPatients}
                 disabled={isSearching}
-                className="btn-secondary hover:bg-gray-200 px-3"
+                className="btn-secondary px-3"
+                title="Show All Patients"
               >
                 {isSearching ? (
                   <Loader2 className="animate-spin" size={18} />
@@ -744,35 +751,35 @@ const PatientRegistration = () => {
           </div>
 
           {/* Form Actions - Matching DoctorMaster */}
-          <div className="flex justify-end space-x-3 pt-6 border-t">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t">
             <button
               type="button"
               onClick={handleDelete}
-              className="px-6 py-2.5 border border-red-300 rounded-lg font-medium text-red-700 hover:bg-red-50 transition-colors flex items-center"
+              className="w-full sm:w-auto px-6 py-2.5 border border-red-300 rounded-xl font-medium text-red-700 hover:bg-red-50 transition-colors flex items-center justify-center cursor-pointer"
             >
-              <Trash2 size={20} className="mr-2" />
+              <Trash2 size={18} className="mr-2" />
               Clear Form
             </button>
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
-              className="px-6 py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="w-full sm:w-auto px-6 py-2.5 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer text-center"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className={`px-6 py-2.5 text-white font-medium rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center shadow-md ${
+              className={`w-full sm:w-auto px-6 py-2.5 text-white font-medium rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-md cursor-pointer ${
                 isIP 
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700' 
                   : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
               }`}
             >
               {isLoading ? (
-                <Loader2 className="animate-spin mr-2" size={20} />
+                <Loader2 className="animate-spin mr-2" size={18} />
               ) : (
-                <Save size={20} className="mr-2" />
+                <Save size={18} className="mr-2" />
               )}
               {isLoading ? 'Registering...' : `Register as ${isIP ? 'IP' : 'OP'}`}
             </button>

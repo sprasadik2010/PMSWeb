@@ -23,6 +23,7 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react'
+import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface UserAdmin {
   id: number
@@ -233,9 +234,12 @@ const AdminPanel: React.FC = () => {
             Monitor clinical workspace growth, configure active marketing ads, view platform conversions and manage clinic accounts.
           </p>
         </div>
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 hidden md:block">
-          <p className="text-xs text-rose-200">Security Clearance</p>
-          <p className="text-sm font-bold">ROOT SUPERADMIN</p>
+        <div className="flex items-center gap-3">
+          <VoiceSwitch compact label="Voice Typing" />
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 hidden md:block">
+            <p className="text-xs text-rose-200">Security Clearance</p>
+            <p className="text-sm font-bold">ROOT SUPERADMIN</p>
+          </div>
         </div>
       </div>
 
@@ -370,15 +374,18 @@ const AdminPanel: React.FC = () => {
           {activeTab === 'users' && (
             <div className="space-y-6">
               {/* Search Bar */}
-              <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-2xl px-4 py-2.5 max-w-md shadow-sm">
-                <Search className="text-gray-400" size={20} />
-                <input
-                  type="text"
-                  placeholder="Search clinics by name or username..."
-                  value={userSearch}
-                  onChange={(e) => setUserSearch(e.target.value)}
-                  className="w-full bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400"
-                />
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-2xl px-4 py-2.5 w-full sm:max-w-md shadow-sm">
+                  <Search className="text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    placeholder="Search clinics by name or username..."
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    className="w-full bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400"
+                  />
+                </div>
+                <VoiceSwitch compact label="Voice Search" />
               </div>
 
               {/* Table */}

@@ -4,6 +4,7 @@ import { Download, Filter, Calendar, Printer, FileText, BarChart3, Users, Credit
 import toast from 'react-hot-toast'
 import { format, isValid, parseISO } from 'date-fns'
 import { appConfig } from '../config/appConfig';
+import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface Particular {
   id: number;
@@ -1557,16 +1558,17 @@ const Reports = () => {
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 shadow-xl">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center">
-              <BarChart3 className="mr-3" size={32} />
-              Analytics & Reports
+              <BarChart3 className="mr-3 shrink-0" size={32} />
+              <span>Analytics & Reports</span>
             </h1>
-            <p className="text-blue-100 mt-2 text-lg">Comprehensive hospital analytics and reporting</p>
+            <p className="text-blue-100 mt-2 text-base sm:text-lg">Comprehensive hospital analytics and reporting</p>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
+          <div className="flex items-center gap-4">
+            <VoiceSwitch compact label="Voice Typing" />
+            <div className="text-right hidden sm:block">
               <p className="text-blue-100 text-sm">Last Updated</p>
               <p className="text-white font-medium">{format(new Date(), 'dd/MM/yyyy hh:mm a')}</p>
             </div>

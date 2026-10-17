@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import QRCode from 'qrcode'
+import { VoiceSwitch } from '../components/VoiceFloatingBar'
 import {
   FileText,
   Plus,
@@ -548,27 +549,30 @@ export const Prescriptions: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white/10 p-1.5 rounded-xl backdrop-blur-md border border-white/20">
-          <button
-            onClick={() => setActiveTab('new')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === 'new'
-                ? 'bg-white text-blue-800 shadow-md'
-                : 'text-white hover:bg-white/10'
-            }`}
-          >
-            New Consultation
-          </button>
-          <button
-            onClick={() => setActiveTab('list')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === 'list'
-                ? 'bg-white text-blue-800 shadow-md'
-                : 'text-white hover:bg-white/10'
-            }`}
-          >
-            Prescription Records
-          </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <VoiceSwitch compact label="Voice Typing" />
+          <div className="flex items-center gap-2 bg-white/10 p-1.5 rounded-xl backdrop-blur-md border border-white/20">
+            <button
+              onClick={() => setActiveTab('new')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === 'new'
+                  ? 'bg-white text-blue-800 shadow-md'
+                  : 'text-white hover:bg-white/10'
+              }`}
+            >
+              New Consultation
+            </button>
+            <button
+              onClick={() => setActiveTab('list')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === 'list'
+                  ? 'bg-white text-blue-800 shadow-md'
+                  : 'text-white hover:bg-white/10'
+              }`}
+            >
+              Prescription Records
+            </button>
+          </div>
         </div>
       </div>
 
