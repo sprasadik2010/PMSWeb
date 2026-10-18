@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { X, Search, Building, CalendarClock, User, Loader2, Users, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react'
+import { 
+  X, Search, Building, CalendarClock, User, Loader2, Users, 
+  ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Plus, 
+  Printer, CheckCircle2, Receipt, Trash2 
+} from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import type { AxiosError } from 'axios'
@@ -114,7 +118,6 @@ const OPBillEntry = () => {
   
   const [particulars, setParticulars] = useState<Particular[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
-  const [isDataLoaded, setIsDataLoaded] = useState(false)
 
   const [patientFormData, setPatientFormData] = useState({
     name: '',
@@ -137,8 +140,21 @@ const OPBillEntry = () => {
     payment_mode: 'Cash'
   })
 
-  // Initialize with empty array, will be populated after particulars load
-  const [billItems, setBillItems] = useState<BillItem[]>([])
+  // Initialize with at least one item so the form is never locked or empty
+  const [billItems, setBillItems] = useState<BillItem[]>([
+    {
+      particular: '',
+      doctor: '',
+      doctor_id: 0,
+      department: 'OPD',
+      unit: 1,
+      rate: 0,
+      amount: 0,
+      discount_percent: 0,
+      discount_amount: 0,
+      total: 0
+    }
+  ])
 
   // Initialize bill number on component mount
   useEffect(() => {
@@ -153,14 +169,23 @@ const OPBillEntry = () => {
   }, [])
 
   const fetchInitialData = async () => {
+    setIsLoading(true)
     try {
-      await Promise.all([
+      const [doctorsData, , particularsData] = await Promise.all([
         fetchDoctors(),
         fetchDepartments(),
         fetchParticulars()
       ])
+      
+      const docs = doctorsData || []
+      const parts = particularsData || []
+      initializeBillItemsWithData(docs, parts)
     } catch (error) {
+      console.error('Failed to load initial data:', error)
       toast.error('Failed to load initial data')
+      initializeBillItemsWithData([], [])
+    } finally {
+      setIsLoading(false)
     }
   }
   
@@ -169,10 +194,12 @@ const OPBillEntry = () => {
       const response = await axios.get('/settings/departments', {
         params: { active_only: false }
       })
-      setDepartments(response.data)
+      setDepartments(response.data || [])
+      return response.data || []
     } catch (error) {
       console.error('Error fetching departments:', error)
       toast.error('Failed to load departments')
+      return []
     }
   }
   
@@ -181,8 +208,8 @@ const OPBillEntry = () => {
       const response = await axios.get('/settings/particulars', {
         params: { active_only: false }
       })
-      setParticulars(response.data)
-      return response.data
+      setParticulars(response.data || [])
+      return response.data || []
     } catch (error) {
       console.error('Error fetching particulars:', error)
       toast.error('Failed to load particulars')
@@ -190,56 +217,61 @@ const OPBillEntry = () => {
     }
   }
 
-  // Initialize bill items after doctors and particulars are loaded
-  useEffect(() => {
-    if (particulars.length > 0 && doctors.length > 0 && !isDataLoaded) {
-      initializeBillItems()
-      setIsDataLoaded(true)
+  const initializeBillItemsWithData = (currentDoctors: Doctor[], currentParticulars: Particular[]) => {
+    const defaultDoctorId = currentDoctors[0]?.id || 0
+    const defaultDoctor = currentDoctors.find(dr => dr.id === defaultDoctorId)
+    
+    // Filter to only get OP default particulars
+    const initialBillItems = currentParticulars
+      .filter(par => par.opdefault === true)
+      .sort((a, b) => (a.sortorder || 0) - (b.sortorder || 0))
+      .map(par => ({
+        particular: par.id.toString(),
+        doctor: defaultDoctor?.booking_code || '',
+        doctor_id: defaultDoctorId,
+        department: defaultDoctor?.department || 'OPD',
+        unit: 1,
+        rate: 0,
+        amount: 0,
+        discount_percent: 0,
+        discount_amount: 0,
+        total: 0
+      }))
+
+    // If no opdefault particulars found, fallback to first particular or blank item
+    if (initialBillItems.length === 0 && currentParticulars.length > 0) {
+      initialBillItems.push({
+        particular: currentParticulars[0].id.toString(),
+        doctor: defaultDoctor?.booking_code || '',
+        doctor_id: defaultDoctorId,
+        department: defaultDoctor?.department || 'OPD',
+        unit: 1,
+        rate: 0,
+        amount: 0,
+        discount_percent: 0,
+        discount_amount: 0,
+        total: 0
+      })
+    } else if (initialBillItems.length === 0) {
+      initialBillItems.push({
+        particular: '',
+        doctor: defaultDoctor?.booking_code || '',
+        doctor_id: defaultDoctorId,
+        department: defaultDoctor?.department || 'OPD',
+        unit: 1,
+        rate: 0,
+        amount: 0,
+        discount_percent: 0,
+        discount_amount: 0,
+        total: 0
+      })
     }
-  }, [particulars, doctors])
 
-  const initializeBillItems = () => {
-    const defaultDoctorId = doctors[0]?.id || 0
-    const defaultDoctor = doctors.find(dr => dr.id === defaultDoctorId)
-    // const defaultParticularId = particulars.length > 0 ? String(particulars[0].id) : ''
-    // ADDED BY SIVAPRASAD I K ================
-    const initialBillItems = particulars
-  .filter(par => par.opdefault === true) // Only get OP default particulars
-  .sort((a, b) => a.sortorder - b.sortorder) // Sort by sortorder
-  .map(par => ({
-    particular: par.id.toString(), // Use particular ID
-    doctor: defaultDoctor?.booking_code || '',
-    doctor_id: defaultDoctorId,
-    department: defaultDoctor?.department || 'OPD',
-    unit: 1,
-    rate: 0,
-    amount: 0,
-    discount_percent: 0,
-    discount_amount: 0,
-    total: 0
-  }));
+    setBillItems(initialBillItems)
 
-// If no opdefault particulars found, add at least one item
-if (initialBillItems.length === 0 && particulars.length > 0) {
-  initialBillItems.push({
-    particular: particulars[0].id.toString(),
-    doctor: defaultDoctor?.booking_code || '',
-    doctor_id: defaultDoctorId,
-    department: defaultDoctor?.department || 'OPD',
-    unit: 1,
-    rate: 0,
-    amount: 0,
-    discount_percent: 0,
-    discount_amount: 0,
-    total: 0
-  });
-}
-
-setBillItems(initialBillItems);
-    //=================================
     // Also set default doctor in patient form
-    if (doctors.length > 0) {
-      setPatientFormData(prev => ({ ...prev, doctor_id: doctors[0].id }))
+    if (currentDoctors.length > 0) {
+      setPatientFormData(prev => ({ ...prev, doctor_id: currentDoctors[0].id }))
     }
   }
 
@@ -1216,87 +1248,92 @@ setBillItems(initialBillItems);
 
   const { totalAmount, totalDiscount, netAmount } = calculateTotals()
 
-  // Show loading state while data is being fetched
-  if (!isDataLoaded || billItems.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="animate-spin mx-auto mb-4" size={32} />
-          <p className="text-gray-600">Loading bill entry form...</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50/70 pb-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-cyan-700 text-white px-6 py-3">
+      <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-cyan-700 text-white px-4 sm:px-6 py-3.5 shadow-md">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center space-x-3">
-            <Building size={24} />
+            <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shrink-0">
+              <Building size={22} className="text-white" />
+            </div>
             <div>
-              <h1 className="text-xl font-bold">Outpatient Bill Entry</h1>
-              {/* Display persistent bill number from ref */}
-              <div className="text-sm text-blue-100 opacity-90">
-                Bill #: {billNumberRef.current} | Date: {format(new Date(), 'dd/MM/yyyy HH:mm')}
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg sm:text-xl font-bold tracking-tight">Outpatient Billing</h1>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-400/20 text-cyan-200 border border-cyan-400/30">
+                  OPD
+                </span>
+              </div>
+              <div className="text-xs text-blue-100/90 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <span>Bill #: <strong className="font-mono text-white">{billNumberRef.current || 'Generating...'}</strong></span>
+                <span className="hidden sm:inline opacity-50">•</span>
+                <span>{format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {isLoading && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 text-xs text-blue-100 border border-white/15">
+                <Loader2 size={13} className="animate-spin" />
+                <span className="hidden sm:inline">Syncing...</span>
+              </div>
+            )}
             <button
+              type="button"
               onClick={() => navigate('/dashboard')}
-              className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded text-sm cursor-pointer"
+              className="p-2 sm:px-3 sm:py-1.5 bg-white/15 hover:bg-white/25 rounded-lg text-sm cursor-pointer transition-colors flex items-center gap-1.5 border border-white/20"
+              title="Close and return to dashboard"
             >
               <X size={18} />
+              <span className="hidden sm:inline text-xs font-semibold">Exit</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="p-4 space-y-4">
+      <div className="p-3 sm:p-5 max-w-7xl mx-auto space-y-4">
         {/* Search Patient Section */}
         {!selectedPatient && (
-          <div className="bg-white rounded-lg shadow border border-gray-200">
-            <div className="p-3 border-b border-gray-200 bg-blue-50">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-50/70 to-indigo-50/50">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <h2 className="font-semibold text-gray-900 flex items-center">
-                    <Search className="mr-2" size={18} />
-                    Search OP Patient
-                  </h2>
+                <div className="flex items-center gap-2 text-blue-900 font-semibold text-sm">
+                  <Search size={18} className="text-blue-600" />
+                  <span>Search Registered OP Patient</span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowSearchResults(!showSearchResults)}
-                  className="text-sm text-blue-600 flex items-center"
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 cursor-pointer"
                 >
+                  {showSearchResults ? 'Collapse' : 'Expand'}
                   {showSearchResults ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
               </div>
             </div>
 
-            <div className="p-3">
-              <div className="flex space-x-2">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && searchPatients()}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm"
-                      placeholder="Search by name, phone, address, complaint, referred by..."
-                    />
-                  </div>
+            <div className="p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={17} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && searchPatients()}
+                    className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                    placeholder="Search by name, phone, address, complaint, referred by..."
+                  />
                 </div>
                 <button
+                  type="button"
                   onClick={searchPatients}
                   disabled={isSearching}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+                  className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-all"
                 >
-                  {isSearching ? <Loader2 className="animate-spin" size={18} /> : 'Search'}
+                  {isSearching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
+                  <span>Search</span>
                 </button>
               </div>
 
@@ -1388,53 +1425,56 @@ setBillItems(initialBillItems);
 
         {/* Selected Patient Info */}
         {selectedPatient && (
-          <div className="bg-white rounded-lg shadow border border-green-200">
-            <div className="p-3 border-b border-green-200 bg-green-50">
+          <div className="bg-white rounded-xl shadow-sm border border-emerald-200 overflow-hidden">
+            <div className="px-4 py-3 border-b border-emerald-100 bg-gradient-to-r from-emerald-50 to-teal-50/50">
               <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <User className="mr-2 text-green-600" size={18} />
-                  <h2 className="font-semibold text-gray-900">Selected Patient</h2>
+                <div className="flex items-center gap-2 text-emerald-900 font-semibold text-sm">
+                  <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs">
+                    <User size={14} />
+                  </div>
+                  <span>Selected Outpatient</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
-                    {selectedPatient.patient_number}
+                <div className="flex items-center gap-2">
+                  <span className="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-mono font-bold border border-emerald-200">
+                    OP: {selectedPatient.patient_number}
                   </span>
                   <button
+                    type="button"
                     onClick={() => setSelectedPatient(null)}
-                    className="text-sm text-gray-500 hover:text-gray-700"
+                    className="text-xs text-gray-500 hover:text-red-600 hover:underline font-medium cursor-pointer"
                   >
                     Change Patient
                   </button>
                 </div>
               </div>
             </div>
-            <div className="p-3">
-              <div className="grid grid-cols-4 gap-3 text-sm">
-                <div>
-                  <span className="text-gray-600">Name:</span>
-                  <span className="ml-2 font-medium">{selectedPatient.name}</span>
+            <div className="p-3 sm:p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Patient Name</div>
+                  <div className="font-bold text-gray-900 mt-0.5">{selectedPatient.name}</div>
                 </div>
-                <div>
-                  <span className="text-gray-600">Age/Gender:</span>
-                  <span className="ml-2 font-medium">{selectedPatient.age} • {selectedPatient.gender}</span>
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Age / Gender</div>
+                  <div className="font-semibold text-gray-800 mt-0.5">{selectedPatient.age} yrs • {selectedPatient.gender}</div>
                 </div>
-                <div>
-                  <span className="text-gray-600">Phone:</span>
-                  <span className="ml-2 font-medium">{selectedPatient.phone}</span>
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Contact Phone</div>
+                  <div className="font-semibold text-gray-800 mt-0.5">{selectedPatient.phone || 'N/A'}</div>
                 </div>
-                <div>
-                  <span className="text-gray-600">Doctor:</span>
-                  <span className="ml-2 font-medium">{selectedPatient.doctor_name}</span>
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Consulting Doctor</div>
+                  <div className="font-semibold text-gray-800 mt-0.5">{selectedPatient.doctor_name || 'N/A'}</div>
                 </div>
-                <div className="col-span-2">
-                  <span className="text-gray-600">Address:</span>
-                  <span className="ml-2 font-medium">
-                    {[selectedPatient.house, selectedPatient.street, selectedPatient.place].filter(Boolean).join(', ')}
-                  </span>
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100 col-span-1 sm:col-span-2">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Address</div>
+                  <div className="font-medium text-gray-800 mt-0.5">
+                    {[selectedPatient.house, selectedPatient.street, selectedPatient.place].filter(Boolean).join(', ') || 'N/A'}
+                  </div>
                 </div>
-                <div className="col-span-2">
-                  <span className="text-gray-600">Complaint:</span>
-                  <span className="ml-2 font-medium">{selectedPatient.complaint}</span>
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100 col-span-1 sm:col-span-2">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Chief Complaint</div>
+                  <div className="font-medium text-gray-800 mt-0.5">{selectedPatient.complaint || 'General Checkup'}</div>
                 </div>
               </div>
             </div>
@@ -1617,42 +1657,45 @@ setBillItems(initialBillItems);
 
         {/* Patient Details Section (Only for new patients) */}
         {!selectedPatient && (
-          <div className="bg-white rounded-lg shadow border border-gray-200">
-            <div className="p-3 border-b border-gray-200 bg-blue-50">
-              <h2 className="font-semibold text-gray-900">New Patient Details</h2>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-50/70 to-indigo-50/40">
+              <h2 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                <User size={16} className="text-blue-600" />
+                <span>New Patient Registration & Info</span>
+              </h2>
             </div>
 
-            <div className="p-3">
-              <div className="grid grid-cols-4 gap-3">
+            <div className="p-3 sm:p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
                 {/* Row 1 */}
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Name *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Patient Name *</label>
                   <input
                     type="text"
                     value={patientFormData.name}
                     onChange={(e) => setPatientFormData({ ...patientFormData, name: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                     placeholder="Full name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Age *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Age (Years) *</label>
                   <input
                     type="text"
                     value={patientFormData.age}
                     onChange={(e) => setPatientFormData({ ...patientFormData, age: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="Years"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    placeholder="e.g. 32"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Gender *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Gender *</label>
                   <select
                     value={patientFormData.gender}
                     onChange={(e) => setPatientFormData({ ...patientFormData, gender: e.target.value as any })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
                   >
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -1661,68 +1704,68 @@ setBillItems(initialBillItems);
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Phone *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Phone Number *</label>
                   <input
                     type="tel"
                     value={patientFormData.phone}
                     onChange={(e) => setPatientFormData({ ...patientFormData, phone: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="Mobile"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    placeholder="10-digit mobile"
                   />
                 </div>
 
                 {/* Row 2 */}
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">House No.</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">House / Apt No.</label>
                   <input
                     type="text"
                     value={patientFormData.house}
                     onChange={(e) => setPatientFormData({ ...patientFormData, house: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="House"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    placeholder="House / Flat #"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Street</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Street / Landmark</label>
                   <input
                     type="text"
                     value={patientFormData.street}
                     onChange={(e) => setPatientFormData({ ...patientFormData, street: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="Street"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    placeholder="Street name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Place *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Place / City *</label>
                   <input
                     type="text"
                     value={patientFormData.place}
                     onChange={(e) => setPatientFormData({ ...patientFormData, place: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="City"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    placeholder="City / Village"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Email</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Email Address</label>
                   <input
                     type="email"
                     value={patientFormData.email}
                     onChange={(e) => setPatientFormData({ ...patientFormData, email: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="Email"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    placeholder="Email (optional)"
                   />
                 </div>
 
                 {/* Row 3 */}
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Doctor *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Consulting Doctor *</label>
                   <select
                     value={patientFormData.doctor_id}
                     onChange={(e) => setPatientFormData({ ...patientFormData, doctor_id: parseInt(e.target.value) })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
                   >
                     {doctors.map(doctor => (
                       <option key={doctor.id} value={doctor.id}>{doctor.name.replace('Dr.', '').trim()}</option>
@@ -1731,24 +1774,24 @@ setBillItems(initialBillItems);
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Referred By</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Referred By</label>
                   <input
                     type="text"
                     value={patientFormData.referred_by}
                     onChange={(e) => setPatientFormData({ ...patientFormData, referred_by: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="Referred by"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    placeholder="Referral source"
                   />
                 </div>
 
-                <div className="col-span-2">
-                  <label className="block text-xs text-gray-600 mb-1">Complaint *</label>
+                <div className="col-span-1 sm:col-span-2">
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Chief Complaint *</label>
                   <input
                     type="text"
                     value={patientFormData.complaint}
                     onChange={(e) => setPatientFormData({ ...patientFormData, complaint: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="Patient complaint"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    placeholder="e.g. Fever, Headache, Routine OP Checkup"
                   />
                 </div>
               </div>
@@ -1757,17 +1800,20 @@ setBillItems(initialBillItems);
         )}
 
         {/* Bill Entry Section */}
-        <div className="bg-white rounded-lg shadow border border-gray-200">
-          <div className="p-3 border-b border-gray-200 bg-green-50">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-              <h2 className="font-semibold text-gray-900">Bill Entry</h2>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="text-sm">
-                  <label className="text-gray-600 mr-2">Bill Type:</label>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-emerald-50/70 to-teal-50/40">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h2 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                <Receipt size={16} className="text-emerald-600" />
+                <span>Bill Particulars & Charges</span>
+              </h2>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 shadow-2xs">
+                  <span className="text-gray-500 font-medium">Type:</span>
                   <select
                     value={billFormData.bill_type}
                     onChange={(e) => setBillFormData({ ...billFormData, bill_type: e.target.value })}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm"
+                    className="font-bold text-gray-800 bg-transparent focus:outline-none cursor-pointer"
                   >
                     <option value="Cash">Cash</option>
                     <option value="Credit">Credit</option>
@@ -1775,12 +1821,12 @@ setBillItems(initialBillItems);
                   </select>
                 </div>
 
-                <div className="text-sm">
-                  <label className="text-gray-600 mr-2">Category:</label>
+                <div className="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 shadow-2xs">
+                  <span className="text-gray-500 font-medium">Category:</span>
                   <select
                     value={billFormData.category}
                     onChange={(e) => setBillFormData({ ...billFormData, category: e.target.value })}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm"
+                    className="font-bold text-gray-800 bg-transparent focus:outline-none cursor-pointer"
                   >
                     <option value="General">General</option>
                     <option value="ICU">ICU</option>
@@ -1788,12 +1834,12 @@ setBillItems(initialBillItems);
                   </select>
                 </div>
 
-                <div className="text-sm">
-                  <label className="text-gray-600 mr-2">Payment:</label>
+                <div className="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 shadow-2xs">
+                  <span className="text-gray-500 font-medium">Payment:</span>
                   <select
                     value={billFormData.payment_mode}
                     onChange={(e) => setBillFormData({ ...billFormData, payment_mode: e.target.value })}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm"
+                    className="font-bold text-emerald-700 bg-transparent focus:outline-none cursor-pointer"
                   >
                     <option value="Cash">Cash</option>
                     <option value="Card">Card</option>
@@ -1829,10 +1875,10 @@ setBillItems(initialBillItems);
               <button
                 type="button"
                 onClick={() => removeBillItem(index)}
-                className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs hover:bg-red-200 cursor-pointer"
-                title="Remove item"
+                className="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 border border-red-200 cursor-pointer transition-colors"
+                title="Remove charge item"
               >
-                ×
+                <Trash2 size={14} />
               </button>
             )}
           </div>
@@ -2026,69 +2072,89 @@ setBillItems(initialBillItems);
     </tbody>
   </table>
 </div>
-            <div className="flex justify-between items-center mt-3">
+            {/* Totals Summary & Add Button */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-4 pt-3 border-t border-gray-100">
               <button
+                type="button"
                 onClick={addBillItem}
-                className="px-3 py-1.5 bg-blue-100 text-blue-700 text-sm rounded hover:bg-blue-200"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 text-xs sm:text-sm font-semibold rounded-lg hover:bg-blue-100 border border-blue-200/80 cursor-pointer transition-colors"
               >
-                + Add Item
+                <Plus size={16} />
+                <span>Add Charge Line</span>
               </button>
 
-              <div className="text-right">
-                <div className="flex items-center space-x-4 text-sm">
-                  <div className="text-gray-600">
-                    Total: <span className="font-bold text-gray-900">₹{totalAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="text-gray-600">
-                    Discount: <span className="font-bold text-red-600">-₹{totalDiscount.toFixed(2)}</span>
-                  </div>
-                  <div className="text-lg font-bold text-green-700">
-                    Net: ₹{netAmount.toFixed(2)}
-                  </div>
+              <div className="grid grid-cols-3 sm:flex sm:items-center gap-2 sm:gap-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                <div className="text-center sm:text-right">
+                  <div className="text-[10px] uppercase font-bold text-gray-500">Gross Total</div>
+                  <div className="font-bold text-gray-900 text-sm">₹{totalAmount.toFixed(2)}</div>
+                </div>
+                <div className="text-center sm:text-right">
+                  <div className="text-[10px] uppercase font-bold text-gray-500">Total Disc.</div>
+                  <div className="font-bold text-red-600 text-sm">-₹{totalDiscount.toFixed(2)}</div>
+                </div>
+                <div className="text-center sm:text-right bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
+                  <div className="text-[10px] uppercase font-black text-emerald-800">Net Payable</div>
+                  <div className="font-black text-emerald-700 text-base">₹{netAmount.toFixed(2)}</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-3">
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-600">
+        {/* Action Buttons Footer */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="text-xs sm:text-sm text-gray-600">
               {selectedPatient ? (
-                <span className="text-green-600 font-medium">
-                  Patient: {selectedPatient.name} ({selectedPatient.patient_number})
+                <span className="text-emerald-700 font-semibold flex items-center gap-1.5">
+                  <User size={15} />
+                  <span>Patient: {selectedPatient.name} ({selectedPatient.patient_number})</span>
                 </span>
               ) : patientFormData.name ? (
-                <span className="text-blue-600 font-medium">
-                  New Patient: {patientFormData.name}
+                <span className="text-blue-700 font-semibold flex items-center gap-1.5">
+                  <User size={15} />
+                  <span>New Patient: {patientFormData.name}</span>
                 </span>
               ) : (
-                'Enter patient details or search existing patient'
+                <span className="text-gray-400 italic">Enter patient info or select registered patient</span>
               )}
             </div>
 
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
+                type="button"
                 onClick={handleResetForms}
-                className="px-4 py-2 border border-gray-300 text-gray-700 text-sm rounded hover:bg-gray-50"
+                className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 Clear All
               </button>
 
               <button
+                type="button"
                 onClick={handlePrintBill}
-                className="px-4 py-2 border border-blue-300 text-blue-700 text-sm rounded hover:bg-blue-50"
+                className="flex-1 sm:flex-none px-4 py-2 border border-blue-300 text-blue-700 text-xs sm:text-sm font-semibold rounded-lg hover:bg-blue-50 cursor-pointer transition-colors flex items-center justify-center gap-1.5"
               >
-                Print
+                <Printer size={15} />
+                <span>Print Bill</span>
               </button>
 
               <button
+                type="button"
                 onClick={handleSaveBill}
                 disabled={isLoading}
-                className="px-6 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm rounded hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50"
+                className="w-full sm:w-auto px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs sm:text-sm font-bold rounded-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 shadow-md shadow-blue-500/20 cursor-pointer transition-all flex items-center justify-center gap-1.5"
               >
-                {isLoading ? 'Saving...' : 'Save Bill'}
+                {isLoading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 size={16} />
+                    <span>Save Bill</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { X, Search, Building, CalendarClock, Bed, Loader2, Users, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react'
+import { 
+  X, Search, Building, CalendarClock, Bed, Loader2, Users, 
+  ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Plus, 
+  Printer, CheckCircle2, Receipt, Trash2 
+} from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import type { AxiosError } from 'axios'
@@ -151,7 +155,17 @@ const IPBillEntry = () => {
     she_education_cess: 0
   })
 
-  const [billItems, setBillItems] = useState<BillItem[]>([])
+  const [billItems, setBillItems] = useState<BillItem[]>([
+    {
+      particular: '',
+      department: '',
+      doctor_id: 0,
+      amount: 0,
+      discount_percent: 0,
+      discount_amount: 0,
+      total: 0
+    }
+  ])
 
   // Initialize bill number on component mount
   useEffect(() => {
@@ -1128,73 +1142,91 @@ const IPBillEntry = () => {
   const { totalAmount, totalDiscount, subTotal, netAmount } = calculateTotals()
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50/70 pb-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white px-6 py-3">
+      <div className="bg-gradient-to-r from-purple-700 via-indigo-700 to-blue-800 text-white px-4 sm:px-6 py-3.5 shadow-md">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center space-x-3">
-            <Building size={24} />
+            <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shrink-0">
+              <Building size={22} className="text-white" />
+            </div>
             <div>
-              <h1 className="text-xl font-bold">Inpatient Bill Entry</h1>
-              <div className="text-sm text-purple-100 opacity-90">
-                Bill #: {billNumberRef.current} | Date: {format(new Date(), 'dd/MM/yyyy HH:mm')}
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg sm:text-xl font-bold tracking-tight">Inpatient Billing</h1>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-400/20 text-purple-200 border border-purple-400/30">
+                  IPD
+                </span>
+              </div>
+              <div className="text-xs text-purple-100/90 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <span>Bill #: <strong className="font-mono text-white">{billNumberRef.current || 'Generating...'}</strong></span>
+                <span className="hidden sm:inline opacity-50">•</span>
+                <span>{format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {isLoading && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 text-xs text-purple-100 border border-white/15">
+                <Loader2 size={13} className="animate-spin" />
+                <span className="hidden sm:inline">Syncing...</span>
+              </div>
+            )}
             <button
+              type="button"
               onClick={() => navigate('/dashboard')}
-              className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded text-sm cursor-pointer"
+              className="p-2 sm:px-3 sm:py-1.5 bg-white/15 hover:bg-white/25 rounded-lg text-sm cursor-pointer transition-colors flex items-center gap-1.5 border border-white/20"
+              title="Close and return to dashboard"
             >
               <X size={18} />
+              <span className="hidden sm:inline text-xs font-semibold">Exit</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="p-4 space-y-4">
+      <div className="p-3 sm:p-5 max-w-7xl mx-auto space-y-4">
         {/* Search Patient Section */}
         {!selectedPatient && (
-          <div className="bg-white rounded-lg shadow border border-gray-200">
-            <div className="p-3 border-b border-gray-200 bg-purple-50">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-purple-50/70 to-indigo-50/50">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <h2 className="font-semibold text-gray-900 flex items-center">
-                    <Search className="mr-2" size={18} />
-                    Search IP Patient
-                  </h2>
+                <div className="flex items-center gap-2 text-purple-900 font-semibold text-sm">
+                  <Search size={18} className="text-purple-600" />
+                  <span>Search Admitted Inpatient</span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowSearchResults(!showSearchResults)}
-                  className="text-sm text-purple-600 flex items-center"
+                  className="text-xs text-purple-600 hover:text-purple-800 font-medium flex items-center gap-1 cursor-pointer"
                 >
+                  {showSearchResults ? 'Collapse' : 'Expand'}
                   {showSearchResults ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
               </div>
             </div>
 
-            <div className="p-3">
-              <div className="flex space-x-2">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && searchPatients()}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm"
-                      placeholder="Search by name, phone, room, complaint, referred by..."
-                    />
-                  </div>
+            <div className="p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={17} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && searchPatients()}
+                    className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 bg-white"
+                    placeholder="Search by name, phone, room, IP number, complaint..."
+                  />
                 </div>
                 <button
+                  type="button"
                   onClick={searchPatients}
                   disabled={isSearching}
-                  className="px-4 py-2 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 disabled:opacity-50"
+                  className="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-all"
                 >
-                  {isSearching ? <Loader2 className="animate-spin" size={18} /> : 'Search'}
+                  {isSearching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
+                  <span>Search Inpatient</span>
                 </button>
               </div>
 
@@ -1299,60 +1331,65 @@ const IPBillEntry = () => {
 
         {/* Selected Patient Info */}
         {selectedPatient && (
-          <div className="bg-white rounded-lg shadow border border-green-200">
-            <div className="p-3 border-b border-green-200 bg-green-50">
+          <div className="bg-white rounded-xl shadow-sm border border-emerald-200 overflow-hidden">
+            <div className="px-4 py-3 border-b border-emerald-100 bg-gradient-to-r from-emerald-50 to-teal-50/50">
               <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <Bed className="mr-2 text-green-600" size={18} />
-                  <h2 className="font-semibold text-gray-900">Selected Inpatient</h2>
+                <div className="flex items-center gap-2 text-emerald-900 font-semibold text-sm">
+                  <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs">
+                    <Bed size={14} />
+                  </div>
+                  <span>Selected Inpatient</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
-                    {selectedPatient.patient_number}
+                <div className="flex items-center gap-2">
+                  <span className="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-mono font-bold border border-emerald-200">
+                    IP: {selectedPatient.patient_number}
                   </span>
                   <button
+                    type="button"
                     onClick={() => setSelectedPatient(null)}
-                    className="text-sm text-gray-500 hover:text-gray-700"
+                    className="text-xs text-gray-500 hover:text-red-600 hover:underline font-medium cursor-pointer"
                   >
                     Change Patient
                   </button>
                 </div>
               </div>
             </div>
-            <div className="p-3">
-              <div className="grid grid-cols-4 gap-3 text-sm">
-                <div>
-                  <span className="text-gray-600">Name:</span>
-                  <span className="ml-2 font-medium">{selectedPatient.name}</span>
+            <div className="p-3 sm:p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Patient Name</div>
+                  <div className="font-bold text-gray-900 mt-0.5">{selectedPatient.name}</div>
                 </div>
-                <div>
-                  <span className="text-gray-600">Age/Gender:</span>
-                  <span className="ml-2 font-medium">{selectedPatient.age} • {selectedPatient.gender}</span>
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Age / Gender</div>
+                  <div className="font-semibold text-gray-800 mt-0.5">{selectedPatient.age} yrs • {selectedPatient.gender}</div>
                 </div>
-                <div>
-                  <span className="text-gray-600">Room:</span>
-                  <span className="ml-2 font-medium flex items-center">
-                    <Bed className="mr-1" size={14} />
-                    {selectedPatient.room}
-                  </span>
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Room / Ward</div>
+                  <div className="font-semibold text-purple-700 mt-0.5 flex items-center gap-1">
+                    <Bed size={14} />
+                    <span>{selectedPatient.room || 'General Ward'}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-gray-600">Phone:</span>
-                  <span className="ml-2 font-medium">{selectedPatient.phone}</span>
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Contact Phone</div>
+                  <div className="font-semibold text-gray-800 mt-0.5">{selectedPatient.phone || 'N/A'}</div>
                 </div>
-                <div>
-                  <span className="text-gray-600">Doctor:</span>
-                  <span className="ml-2 font-medium">{doctors.filter(dr => dr.id == selectedPatient.doctor_id).at(0)?.name}</span>
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Consulting Doctor</div>
+                  <div className="font-semibold text-gray-800 mt-0.5">
+                    {doctors.find(dr => dr.id === selectedPatient.doctor_id)?.name || 'Attending Physician'}
+                  </div>
                 </div>
-                <div className="col-span-2">
-                  <span className="text-gray-600">Address:</span>
-                  <span className="ml-2 font-medium">
-                    {[selectedPatient.house, selectedPatient.street, selectedPatient.place].filter(Boolean).join(', ')}
-                  </span>
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100 col-span-1 sm:col-span-2 lg:col-span-3">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Address</div>
+                  <div className="font-medium text-gray-800 mt-0.5">
+                    {[selectedPatient.house, selectedPatient.street, selectedPatient.place].filter(Boolean).join(', ') || 'N/A'}
+                  </div>
                 </div>
-                <div className="col-span-4">
-                  <span className="text-gray-600">Complaint:</span>
-                  <span className="ml-2 font-medium">{selectedPatient.complaint}</span>
+                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100 col-span-1 sm:col-span-2 lg:col-span-4">
+                  <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Chief Complaint / Admission Reason</div>
+                  <div className="font-medium text-gray-800 mt-0.5">{selectedPatient.complaint || 'Inpatient Admission'}</div>
                 </div>
               </div>
             </div>
@@ -1542,42 +1579,45 @@ const IPBillEntry = () => {
 
         {/* Patient Details Section (Only for new patients) */}
         {!selectedPatient && (
-          <div className="bg-white rounded-lg shadow border border-gray-200">
-            <div className="p-3 border-b border-gray-200 bg-purple-50">
-              <h2 className="font-semibold text-gray-900">New Inpatient Details</h2>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-purple-50/70 to-indigo-50/40">
+              <h2 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                <Bed size={16} className="text-purple-600" />
+                <span>New Inpatient Admission & Info</span>
+              </h2>
             </div>
 
-            <div className="p-3">
-              <div className="grid grid-cols-4 gap-3">
+            <div className="p-3 sm:p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
                 {/* Row 1 */}
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Name *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Patient Name *</label>
                   <input
                     type="text"
                     value={patientFormData.name}
                     onChange={(e) => setPatientFormData({ ...patientFormData, name: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
                     placeholder="Full name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Age *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Age (Years) *</label>
                   <input
                     type="text"
                     value={patientFormData.age}
                     onChange={(e) => setPatientFormData({ ...patientFormData, age: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="Years"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    placeholder="e.g. 45"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Gender *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Gender *</label>
                   <select
                     value={patientFormData.gender}
                     onChange={(e) => setPatientFormData({ ...patientFormData, gender: e.target.value as any })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 bg-white"
                   >
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -1586,55 +1626,55 @@ const IPBillEntry = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Room/Ward *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Room / Ward *</label>
                   <input
                     type="text"
                     value={patientFormData.room}
                     onChange={(e) => setPatientFormData({ ...patientFormData, room: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="ICU-101"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    placeholder="e.g. ICU-02 or Ward-104"
                   />
                 </div>
 
                 {/* Row 2 */}
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Admission Date</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Admission Date</label>
                   <input
                     type="date"
                     value={patientFormData.admission_date}
                     onChange={(e) => setPatientFormData({ ...patientFormData, admission_date: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Phone *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Phone Number *</label>
                   <input
                     type="tel"
                     value={patientFormData.phone}
                     onChange={(e) => setPatientFormData({ ...patientFormData, phone: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="Mobile"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    placeholder="10-digit mobile"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Email</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Email Address</label>
                   <input
                     type="email"
                     value={patientFormData.email}
                     onChange={(e) => setPatientFormData({ ...patientFormData, email: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="Email"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    placeholder="Email (optional)"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Doctor *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Consulting Doctor *</label>
                   <select
                     value={patientFormData.doctor_id}
                     onChange={(e) => setPatientFormData({ ...patientFormData, doctor_id: parseInt(e.target.value) })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 bg-white"
                   >
                     {doctors.map(doctor => (
                       <option key={doctor.id} value={doctor.id}>{doctor.name}</option>
@@ -1644,58 +1684,57 @@ const IPBillEntry = () => {
 
                 {/* Row 3 */}
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">House No.</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">House / Flat No.</label>
                   <input
                     type="text"
                     value={patientFormData.house}
                     onChange={(e) => setPatientFormData({ ...patientFormData, house: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="House"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    placeholder="House #"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Street</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Street / Landmark</label>
                   <input
                     type="text"
                     value={patientFormData.street}
                     onChange={(e) => setPatientFormData({ ...patientFormData, street: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="Street"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    placeholder="Street name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Place *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Place / City *</label>
                   <input
                     type="text"
                     value={patientFormData.place}
                     onChange={(e) => setPatientFormData({ ...patientFormData, place: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="City"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    placeholder="City / Village"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Referred By</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Referred By</label>
                   <input
                     type="text"
                     value={patientFormData.referred_by}
                     onChange={(e) => setPatientFormData({ ...patientFormData, referred_by: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="Referred by"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    placeholder="Referral source"
                   />
                 </div>
 
-                {/* Row 4 */}
-                <div className="col-span-4">
-                  <label className="block text-xs text-gray-600 mb-1">Complaint *</label>
+                <div className="col-span-1 sm:col-span-2 lg:col-span-4">
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Chief Complaint / Diagnosis *</label>
                   <input
                     type="text"
                     value={patientFormData.complaint}
                     onChange={(e) => setPatientFormData({ ...patientFormData, complaint: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded"
-                    placeholder="Patient complaint"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    placeholder="e.g. Acute Appendicitis, Observation, Pre-Op"
                   />
                 </div>
               </div>
@@ -1704,37 +1743,40 @@ const IPBillEntry = () => {
         )}
 
         {/* Bill Entry Section */}
-        <div className="bg-white rounded-lg shadow border border-gray-200">
-          <div className="p-3 border-b border-gray-200 bg-indigo-50">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-              <h2 className="font-semibold text-gray-900">Bill Entry</h2>
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center space-x-2">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-purple-50/70 to-indigo-50/40">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h2 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                <Receipt size={16} className="text-purple-600" />
+                <span>Inpatient Particulars & Charges</span>
+              </h2>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <label className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 shadow-2xs text-xs cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={billFormData.is_insurance}
                     onChange={(e) => setBillFormData({ ...billFormData, is_insurance: e.target.checked })}
-                    className="w-4 h-4"
+                    className="w-3.5 h-3.5 text-purple-600 rounded"
                   />
-                  <label className="text-sm text-gray-600">Insurance</label>
-                </div>
+                  <span className="font-medium text-gray-700">Insurance</span>
+                </label>
 
-                <div className="flex items-center space-x-2">
+                <label className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 shadow-2xs text-xs cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={billFormData.is_credit}
                     onChange={(e) => setBillFormData({ ...billFormData, is_credit: e.target.checked })}
-                    className="w-4 h-4"
+                    className="w-3.5 h-3.5 text-purple-600 rounded"
                   />
-                  <label className="text-sm text-gray-600">Credit</label>
-                </div>
+                  <span className="font-medium text-gray-700">Credit</span>
+                </label>
 
-                <div className="text-sm">
-                  <label className="text-gray-600 mr-2">Category:</label>
+                <div className="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 shadow-2xs">
+                  <span className="text-gray-500 font-medium">Category:</span>
                   <select
                     value={billFormData.category}
                     onChange={(e) => setBillFormData({ ...billFormData, category: e.target.value })}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm"
+                    className="font-bold text-gray-800 bg-transparent focus:outline-none cursor-pointer"
                   >
                     <option value="General">General</option>
                     <option value="ICU">ICU</option>
@@ -1745,29 +1787,30 @@ const IPBillEntry = () => {
             </div>
           </div>
 
-          <div className="p-3">
+          <div className="p-3 sm:p-4">
             {/* Insurance Details */}
             {billFormData.is_insurance && (
-              <div className="mb-3 p-2 border border-yellow-200 bg-yellow-50 rounded">
-                <div className="grid grid-cols-4 gap-2">
+              <div className="mb-4 p-3 border border-amber-200 bg-amber-50/60 rounded-xl space-y-2">
+                <div className="text-xs font-bold uppercase tracking-wider text-amber-800">Insurance Claim Details</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-gray-600 mb-1">Insurance Co.</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Insurance Company Name</label>
                     <input
                       type="text"
                       value={billFormData.insurance_company}
                       onChange={(e) => setBillFormData({ ...billFormData, insurance_company: e.target.value })}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                      placeholder="Company"
+                      className="w-full px-3 py-1.5 text-sm border border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                      placeholder="e.g. Star Health / ICICI Lombard"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-600 mb-1">Policy No.</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Policy / Pre-Auth Number</label>
                     <input
                       type="text"
                       value={billFormData.policy_number}
                       onChange={(e) => setBillFormData({ ...billFormData, policy_number: e.target.value })}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                      placeholder="Policy number"
+                      className="w-full px-3 py-1.5 text-sm border border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                      placeholder="e.g. POL-9874523"
                     />
                   </div>
                 </div>
@@ -1791,10 +1834,10 @@ const IPBillEntry = () => {
                         <button
                           type="button"
                           onClick={() => removeBillItem(index)}
-                          className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs hover:bg-red-200 cursor-pointer"
-                          title="Remove item"
+                          className="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 border border-red-200 cursor-pointer transition-colors"
+                          title="Remove charge item"
                         >
-                          ×
+                          <Trash2 size={14} />
                         </button>
                       )}
                     </div>
@@ -1967,63 +2010,69 @@ const IPBillEntry = () => {
               </table>
             </div>
 
-            <div className="flex justify-between items-center mt-3">
+            {/* Totals Summary & Add Button */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-4 pt-3 border-t border-gray-100">
               <button
+                type="button"
                 onClick={addBillItem}
-                className="px-3 py-1.5 bg-purple-100 text-purple-700 text-sm rounded hover:bg-purple-200"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-purple-50 text-purple-700 text-xs sm:text-sm font-semibold rounded-lg hover:bg-purple-100 border border-purple-200/80 cursor-pointer transition-colors"
               >
-                + Add Item
+                <Plus size={16} />
+                <span>Add Charge Line</span>
               </button>
 
-              <div className="text-right">
-                <div className="flex items-center space-x-4 text-sm">
-                  <div className="text-gray-600">
-                    Total: <span className="font-bold text-gray-900">₹{totalAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="text-gray-600">
-                    Discount: <span className="font-bold text-red-600">-₹{totalDiscount.toFixed(2)}</span>
-                  </div>
-                  <div className="text-gray-600">
-                    Sub Total: <span className="font-bold text-gray-900">₹{subTotal.toFixed(2)}</span>
-                  </div>
-                  <div className="text-lg font-bold text-green-700">
-                    Net: ₹{netAmount.toFixed(2)}
-                  </div>
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                <div className="text-center sm:text-right">
+                  <div className="text-[10px] uppercase font-bold text-gray-500">Gross Total</div>
+                  <div className="font-bold text-gray-900 text-sm">₹{totalAmount.toFixed(2)}</div>
+                </div>
+                <div className="text-center sm:text-right">
+                  <div className="text-[10px] uppercase font-bold text-gray-500">Total Disc.</div>
+                  <div className="font-bold text-red-600 text-sm">-₹{totalDiscount.toFixed(2)}</div>
+                </div>
+                <div className="text-center sm:text-right">
+                  <div className="text-[10px] uppercase font-bold text-gray-500">Sub Total</div>
+                  <div className="font-bold text-gray-900 text-sm">₹{subTotal.toFixed(2)}</div>
+                </div>
+                <div className="text-center sm:text-right bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
+                  <div className="text-[10px] uppercase font-black text-emerald-800">Net Payable</div>
+                  <div className="font-black text-emerald-700 text-base">₹{netAmount.toFixed(2)}</div>
                 </div>
               </div>
             </div>
 
             {/* Tax Section */}
-            <div className="mt-3 p-2 border border-blue-200 bg-blue-50 rounded">
-              <div className="grid grid-cols-4 gap-2">
+            <div className="mt-4 p-3 border border-blue-200 bg-blue-50/60 rounded-xl space-y-2">
+              <div className="text-xs font-bold uppercase tracking-wider text-blue-900">Statutory Cess / Tax Adjustments</div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Service Tax</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Service Tax (₹)</label>
                   <input
                     type="text"
-                    step="0.01"
                     value={billFormData.service_tax}
                     onChange={(e) => setBillFormData({ ...billFormData, service_tax: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                    className="w-full px-3 py-1.5 text-sm border border-blue-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    placeholder="0.00"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Ed. Cess</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Education Cess (₹)</label>
                   <input
                     type="text"
-                    step="0.01"
                     value={billFormData.education_cess}
                     onChange={(e) => setBillFormData({ ...billFormData, education_cess: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                    className="w-full px-3 py-1.5 text-sm border border-blue-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    placeholder="0.00"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">SH Ed. Cess</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">SH Ed. Cess (₹)</label>
                   <input
                     type="text"
-                    step="0.01"
                     value={billFormData.she_education_cess}
                     onChange={(e) => setBillFormData({ ...billFormData, she_education_cess: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                    className="w-full px-3 py-1.5 text-sm border border-blue-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    placeholder="0.00"
                   />
                 </div>
               </div>
@@ -2031,44 +2080,60 @@ const IPBillEntry = () => {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-3">
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-600">
+        {/* Action Buttons Footer */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="text-xs sm:text-sm text-gray-600">
               {selectedPatient ? (
-                <span className="text-green-600 font-medium">
-                  Patient: {selectedPatient.name} ({selectedPatient.patient_number}) | Room: {selectedPatient.room}
+                <span className="text-emerald-700 font-semibold flex items-center gap-1.5">
+                  <Bed size={15} />
+                  <span>Patient: {selectedPatient.name} ({selectedPatient.patient_number}) | Room: {selectedPatient.room || 'General'}</span>
                 </span>
               ) : patientFormData.name ? (
-                <span className="text-purple-600 font-medium">
-                  New Inpatient: {patientFormData.name} | Room: {patientFormData.room}
+                <span className="text-purple-700 font-semibold flex items-center gap-1.5">
+                  <Bed size={15} />
+                  <span>New Inpatient: {patientFormData.name} | Room: {patientFormData.room || 'TBD'}</span>
                 </span>
               ) : (
-                'Enter inpatient details or search existing inpatient'
+                <span className="text-gray-400 italic">Enter inpatient info or select admitted patient</span>
               )}
             </div>
 
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
+                type="button"
                 onClick={handleResetForms}
-                className="px-4 py-2 border border-gray-300 text-gray-700 text-sm rounded hover:bg-gray-50"
+                className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 Clear All
               </button>
 
               <button
+                type="button"
                 onClick={() => handlePrintBill()}
-                className="px-4 py-2 border border-blue-300 text-blue-700 text-sm rounded hover:bg-blue-50"
+                className="flex-1 sm:flex-none px-4 py-2 border border-blue-300 text-blue-700 text-xs sm:text-sm font-semibold rounded-lg hover:bg-blue-50 cursor-pointer transition-colors flex items-center justify-center gap-1.5"
               >
-                Print
+                <Printer size={15} />
+                <span>Print Bill</span>
               </button>
 
               <button
+                type="button"
                 onClick={handleSaveBill}
                 disabled={isLoading}
-                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm rounded hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50"
+                className="w-full sm:w-auto px-6 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs sm:text-sm font-bold rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 shadow-md shadow-purple-500/20 cursor-pointer transition-all flex items-center justify-center gap-1.5"
               >
-                {isLoading ? 'Saving...' : 'Save Bill'}
+                {isLoading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 size={16} />
+                    <span>Save Bill</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
