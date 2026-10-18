@@ -137,7 +137,79 @@ const SelectPatient = () => {
 
           {/* Patient Grid/Table */}
           <div className="mb-6">
-            <div className="overflow-x-auto">
+            {/* Mobile Patient Cards View */}
+            <div className="lg:hidden space-y-2.5">
+              {isLoading ? (
+                <div className="py-8 text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+                </div>
+              ) : filteredPatients.length === 0 ? (
+                <div className="py-8 text-center text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200 text-sm">
+                  No patients found
+                </div>
+              ) : (
+                filteredPatients.map((patient, index) => {
+                  const isSelected = selectedPatient?.id === patient.id;
+                  return (
+                    <div
+                      key={patient.id}
+                      onClick={() => handleSelectPatient(patient)}
+                      className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-2 ${
+                        isSelected
+                          ? 'bg-blue-50/80 border-blue-400 shadow-sm'
+                          : 'bg-white border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <input
+                            type="radio"
+                            name="patient_mobile"
+                            checked={isSelected}
+                            onChange={() => handleSelectPatient(patient)}
+                            className="h-4 w-4 text-primary-600"
+                          />
+                          <span className="font-bold text-gray-900 text-sm">{patient.name}</span>
+                        </div>
+                        <span className="text-xs font-mono font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
+                          {patient.ip_number ? `IP: ${patient.ip_number}` : `#${index + 1}`}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 bg-gray-50/70 p-2 rounded-lg">
+                        {patient.room && (
+                          <div>
+                            <span className="text-gray-400 block text-[10px] uppercase font-bold">Room</span>
+                            <span className="font-medium text-gray-800">{patient.room}</span>
+                          </div>
+                        )}
+                        {patient.phone && (
+                          <div>
+                            <span className="text-gray-400 block text-[10px] uppercase font-bold">Mobile</span>
+                            <span className="font-medium text-gray-800">{patient.phone}</span>
+                          </div>
+                        )}
+                        {patient.place && (
+                          <div>
+                            <span className="text-gray-400 block text-[10px] uppercase font-bold">Place</span>
+                            <span className="font-medium text-gray-800">{patient.place}</span>
+                          </div>
+                        )}
+                        {patient.street && (
+                          <div>
+                            <span className="text-gray-400 block text-[10px] uppercase font-bold">Street</span>
+                            <span className="font-medium text-gray-800 truncate block">{patient.street}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -230,12 +302,12 @@ const SelectPatient = () => {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between pt-6 border-t">
-            <div className="text-sm text-gray-600">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t">
+            <div className="text-xs sm:text-sm text-gray-600">
               Total Patients: <span className="font-semibold">{filteredPatients.length}</span>
             </div>
             
-            <div className="flex space-x-3">
+            <div className="flex space-x-3 w-full sm:w-auto">
               <button
                 onClick={() => navigate(-1)}
                 className="btn-secondary"

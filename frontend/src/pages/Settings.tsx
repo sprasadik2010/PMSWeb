@@ -191,8 +191,8 @@ const SettingsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 mt-6">
+          {/* Stats - Hidden on Mobile */}
+          <div className="hidden sm:grid grid-cols-2 gap-4 mt-6">
             <div className="bg-white rounded-lg shadow p-4">
               <div className="flex items-center justify-between">
                 <div>

@@ -218,14 +218,14 @@ const [formData, setFormData] = useState<Doctor>({
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header with Stats */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3.5 sm:p-6 border border-blue-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2 sm:mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-              <Stethoscope className="mr-3 text-blue-600" size={28} />
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 flex items-center">
+              <Stethoscope className="mr-2 sm:mr-3 text-blue-600 shrink-0" size={22} />
               Doctor Master
             </h1>
-            <p className="text-gray-600 mt-1">Manage hospital doctors and their consultation details</p>
+            <p className="text-gray-600 mt-1 text-xs sm:text-sm hidden sm:block">Manage hospital doctors and their consultation details</p>
           </div>
           <button
             onClick={() => {
@@ -233,19 +233,15 @@ const [formData, setFormData] = useState<Doctor>({
               setShowForm(true)
               window.scrollTo({ top: 0, behavior: 'smooth' })
             }}
-            className="
-    flex items-center
-    bg-gradient-to-r from-blue-600 to-indigo-600
-    hover:from-blue-700 hover:to-indigo-700
-    text-white p-2 rounded-lg shadow-md
-  "
+            className="flex items-center justify-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow-md cursor-pointer transition-all"
           >
-            <Plus size={20} className="mr-2" />
+            <Plus size={16} className="mr-1.5" />
             Add New Doctor
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Stat Cards - Hidden on Mobile */}
+        <div className="hidden lg:grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg mr-3">
@@ -791,8 +787,83 @@ const [formData, setFormData] = useState<Doctor>({
           </div>
         </div>
 
-        {/* Doctors Table */}
-        <div className="overflow-x-auto">
+        {/* Mobile Doctor Cards View */}
+        <div className="lg:hidden divide-y divide-gray-100">
+          {filteredDoctors.length === 0 ? (
+            <div className="px-4 py-8 text-center text-gray-400">
+              <Stethoscope className="mx-auto mb-2 text-gray-300" size={36} />
+              <p className="text-sm">{searchTerm ? 'No doctors found' : 'No doctors added yet'}</p>
+            </div>
+          ) : (
+            filteredDoctors.map((doctor) => (
+              <div key={doctor.id} className="p-4 space-y-3 bg-white">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 bg-blue-100 rounded-xl flex items-center justify-center font-bold text-blue-700 text-xs shrink-0">
+                      DR
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 text-sm">{doctor.name}</h4>
+                      <p className="text-xs text-gray-500">
+                        <span className="font-semibold text-gray-800">{doctor.code}</span> • {doctor.qualification}
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                    doctor.is_resigned
+                      ? 'bg-red-100 text-red-800'
+                      : doctor.is_discontinued
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-green-100 text-green-800'
+                  }`}>
+                    {doctor.is_resigned ? 'Resigned' : doctor.is_discontinued ? 'Discontinued' : 'Active'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs bg-gray-50 p-2.5 rounded-lg border border-gray-100">
+                  <div>
+                    <span className="text-gray-400 block text-[10px] uppercase font-bold">Speciality</span>
+                    <span className="font-medium text-gray-800 truncate block">{doctor.specialty || doctor.department}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 block text-[10px] uppercase font-bold">Timings</span>
+                    <span className="font-medium text-gray-800 truncate block">{doctor.from_time} - {doctor.to_time}</span>
+                  </div>
+                  <div className="col-span-2 flex flex-wrap items-center gap-2 text-[11px] text-gray-500 pt-1 border-t border-gray-200/60">
+                    <span>Tokens: <strong>{doctor.max_tokens}</strong></span>
+                    <span>•</span>
+                    <span>Validity: <strong>{doctor.op_validity}d</strong></span>
+                  </div>
+                  {doctor.phone && (
+                    <div className="col-span-2 flex items-center gap-1.5 text-gray-600 pt-1 border-t border-gray-200/60">
+                      <Phone size={12} className="text-gray-400 shrink-0" />
+                      <span>{doctor.phone}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={() => handleEdit(doctor)}
+                    className="flex-1 inline-flex items-center justify-center py-2 border border-blue-300 text-xs font-bold rounded-lg text-blue-700 bg-blue-50/50 hover:bg-blue-100 cursor-pointer transition-colors"
+                  >
+                    <Edit size={13} className="mr-1.5" />
+                    Edit Doctor
+                  </button>
+                  <button
+                    onClick={() => doctor.id && handleDelete(doctor.id)}
+                    className="px-3 py-2 border border-red-200 text-xs font-bold rounded-lg text-red-600 bg-red-50/50 hover:bg-red-100 cursor-pointer transition-colors"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Doctors Table */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -913,27 +984,27 @@ const [formData, setFormData] = useState<Doctor>({
 
         {/* Summary Footer */}
         {filteredDoctors.length > 0 && (
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="text-xs sm:text-sm text-gray-600">
                 Showing <span className="font-semibold">{filteredDoctors.length}</span> doctors
               </div>
-              <div className="flex items-center space-x-6">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm">
                 <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                  <span className="text-sm text-gray-600">
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500 mr-1.5"></div>
+                  <span className="text-gray-600">
                     Active: <span className="font-semibold">{doctors.filter(d => !d.is_resigned && !d.is_discontinued).length}</span>
                   </span>
                 </div>
                 <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
-                  <span className="text-sm text-gray-600">
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500 mr-1.5"></div>
+                  <span className="text-gray-600">
                     Discontinued: <span className="font-semibold">{doctors.filter(d => d.is_discontinued).length}</span>
                   </span>
                 </div>
                 <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-                  <span className="text-sm text-gray-600">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500 mr-1.5"></div>
+                  <span className="text-gray-600">
                     Resigned: <span className="font-semibold">{doctors.filter(d => d.is_resigned).length}</span>
                   </span>
                 </div>

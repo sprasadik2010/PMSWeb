@@ -1023,12 +1023,38 @@ const Reports = () => {
 
         {/* Summary by Date */}
         {data.summary_by_date && data.summary_by_date.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center">
               <Calendar className="mr-2 text-blue-600" size={20} />
               Summary by Date
             </h3>
-            <div className="overflow-x-auto">
+
+            {/* Mobile Summary Cards */}
+            <div className="lg:hidden space-y-2.5">
+              {data.summary_by_date.map((item: any, index: number) => (
+                <div key={index} className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-gray-900 text-sm">
+                      {item.date ? formatSafeDate(item.date, 'dd/MM/yyyy') : 'N/A'}
+                    </span>
+                    <span className="font-bold text-green-700 text-sm">
+                      ₹{parseFloat(item.total_amount?.toString() || '0').toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 pt-1 border-t border-gray-200/60 text-xs">
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full font-medium">
+                      OP: {item.op_count || 0}
+                    </span>
+                    <span className="px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full font-medium">
+                      IP: {item.ip_count || 0}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Summary Table */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -1067,77 +1093,142 @@ const Reports = () => {
 
         {/* Detailed Data Table */}
         {((data.op_details && data.op_details.length > 0) || (data.ip_details && data.ip_details.length > 0)) && (
-          <div className="overflow-x-auto rounded-xl border border-gray-200">
+          <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
             <div className="bg-gradient-to-r from-teal-50 to-teal-100 p-4 border-b border-teal-200">
-              <h3 className="text-lg font-bold text-gray-900">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900">
                 Detailed Records ({totalCount})
               </h3>
             </div>
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Bill No</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Patient</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Particular</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Qty</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Rate</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Total</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {data.op_details?.map((item: any, index: number) => (
-                  <tr key={`op-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{item.bill_number}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">OP</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{item.patient_name}</div>
-                      <div className="text-sm text-gray-600">{item.patient_age} • {item.patient_gender}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {formatSafeDate(item.bill_date, 'dd/MM/yyyy')}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">
-                        {particulars.filter(par => par.id === Number(item.particular))[0]?.name}
-                      </div>
-                      <div className="text-sm text-gray-600">{item.department}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">₹{parseFloat(item.rate?.toString() || '0').toFixed(2)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap font-bold text-green-700">₹{parseFloat(item.total?.toString() || '0').toFixed(2)}</td>
-                  </tr>
-                ))}
 
-                {data.ip_details?.map((item: any, index: number) => (
-                  <tr key={`ip-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-purple-50'}>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{item.bill_number}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">IP</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{item.patient_name}</div>
-                      <div className="text-sm text-gray-600">{item.patient_age} • {item.patient_gender}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {formatSafeDate(item.bill_date, 'dd/MM/yyyy')}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">
-                        {particulars.filter(par => par.id === item.particular)[0]?.name}
-                      </div>
-                      <div className="text-sm text-gray-600">{item.department}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">₹{parseFloat(item.rate?.toString() || '0').toFixed(2)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap font-bold text-green-700">₹{parseFloat(item.total?.toString() || '0').toFixed(2)}</td>
+            {/* Mobile Detailed Records Cards */}
+            <div className="lg:hidden p-3 space-y-2.5">
+              {data.op_details?.map((item: any, index: number) => (
+                <div key={`mob-op-${index}`} className="p-3 bg-blue-50/40 border border-blue-100 rounded-xl space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-gray-900">{item.bill_number}</span>
+                      <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-800 rounded-full">OP</span>
+                    </div>
+                    <span className="font-bold text-green-700 text-sm">
+                      ₹{parseFloat(item.total?.toString() || '0').toFixed(2)}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900 text-sm">{item.patient_name}</div>
+                    <div className="text-gray-500 text-[11px]">{item.patient_age} • {item.patient_gender} | {formatSafeDate(item.bill_date, 'dd/MM/yyyy')}</div>
+                  </div>
+                  <div className="flex items-center justify-between bg-white p-2 rounded-lg border border-gray-100">
+                    <div>
+                      <span className="font-medium text-gray-800 block">
+                        {particulars.filter(par => par.id === Number(item.particular))[0]?.name || item.particular}
+                      </span>
+                      <span className="text-[10px] text-gray-400">{item.department}</span>
+                    </div>
+                    <div className="text-right text-gray-600">
+                      <span>{item.quantity} × ₹{parseFloat(item.rate?.toString() || '0').toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {data.ip_details?.map((item: any, index: number) => (
+                <div key={`mob-ip-${index}`} className="p-3 bg-purple-50/40 border border-purple-100 rounded-xl space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-gray-900">{item.bill_number}</span>
+                      <span className="px-2 py-0.5 text-[10px] font-bold bg-purple-100 text-purple-800 rounded-full">IP</span>
+                    </div>
+                    <span className="font-bold text-green-700 text-sm">
+                      ₹{parseFloat(item.total?.toString() || '0').toFixed(2)}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900 text-sm">{item.patient_name}</div>
+                    <div className="text-gray-500 text-[11px]">{item.patient_age} • {item.patient_gender} | {formatSafeDate(item.bill_date, 'dd/MM/yyyy')}</div>
+                  </div>
+                  <div className="flex items-center justify-between bg-white p-2 rounded-lg border border-gray-100">
+                    <div>
+                      <span className="font-medium text-gray-800 block">
+                        {particulars.filter(par => par.id === item.particular)[0]?.name || item.particular}
+                      </span>
+                      <span className="text-[10px] text-gray-400">{item.department}</span>
+                    </div>
+                    <div className="text-right text-gray-600">
+                      <span>{item.quantity} × ₹{parseFloat(item.rate?.toString() || '0').toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Bill No</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Patient</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Particular</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Qty</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Rate</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Total</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {data.op_details?.map((item: any, index: number) => (
+                    <tr key={`op-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
+                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{item.bill_number}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">OP</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-900">{item.patient_name}</div>
+                        <div className="text-sm text-gray-600">{item.patient_age} • {item.patient_gender}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {formatSafeDate(item.bill_date, 'dd/MM/yyyy')}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-900">
+                          {particulars.filter(par => par.id === Number(item.particular))[0]?.name}
+                        </div>
+                        <div className="text-sm text-gray-600">{item.department}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">₹{parseFloat(item.rate?.toString() || '0').toFixed(2)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap font-bold text-green-700">₹{parseFloat(item.total?.toString() || '0').toFixed(2)}</td>
+                    </tr>
+                  ))}
+
+                  {data.ip_details?.map((item: any, index: number) => (
+                    <tr key={`ip-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-purple-50'}>
+                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{item.bill_number}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">IP</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-900">{item.patient_name}</div>
+                        <div className="text-sm text-gray-600">{item.patient_age} • {item.patient_gender}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {formatSafeDate(item.bill_date, 'dd/MM/yyyy')}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-900">
+                          {particulars.filter(par => par.id === item.particular)[0]?.name}
+                        </div>
+                        <div className="text-sm text-gray-600">{item.department}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">₹{parseFloat(item.rate?.toString() || '0').toFixed(2)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap font-bold text-green-700">₹{parseFloat(item.total?.toString() || '0').toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
@@ -1249,9 +1340,56 @@ const Reports = () => {
               </div>
             </div>
 
-            {/* Data Table */}
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200">
+            {/* Data Table / Cards */}
+            <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
+              {/* Mobile Collection Cards */}
+              <div className="lg:hidden p-3 space-y-2.5">
+                {Array.isArray(reportData) && reportData.map((bill: any) => (
+                  <div key={bill.id} className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-gray-900 text-sm">{bill.bill_number}</span>
+                        <span className="text-gray-400 text-[11px]">{formatSafeDate(bill.bill_date, 'HH:mm')}</span>
+                      </div>
+                      <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full ${
+                        bill.bill_type === 'Cash' ? 'bg-green-100 text-green-800' :
+                        bill.bill_type === 'Insurance' ? 'bg-blue-100 text-blue-800' :
+                        bill.bill_type === 'Card' ? 'bg-purple-100 text-purple-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {bill.bill_type}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold text-gray-900 text-sm">{bill.patient?.name || 'N/A'}</div>
+                        <div className="text-gray-500 text-[11px]">{bill.patient?.phone || ''}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-gray-700 font-medium">Dr. {bill.doctor?.name || 'N/A'}</div>
+                        <div className="text-gray-400 text-[11px]">{bill.doctor?.specialty || ''}</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-200 bg-white p-2 rounded-lg">
+                      <div className="text-gray-500">
+                        Total: <strong>₹{parseFloat(bill.total_amount || 0).toFixed(2)}</strong>
+                        {parseFloat(bill.discount_amount || 0) > 0 && (
+                          <span className="text-red-500 ml-1.5 text-[11px]">(-₹{parseFloat(bill.discount_amount || 0).toFixed(2)})</span>
+                        )}
+                      </div>
+                      <div className="text-right font-bold text-green-700 text-sm">
+                        ₹{parseFloat(bill.net_amount || 0).toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
@@ -1314,7 +1452,8 @@ const Reports = () => {
               </table>
             </div>
           </div>
-        )
+        </div>
+      )
 
       case 'bill-summary':
         const summaryData = reportData as ReportData;
@@ -1362,60 +1501,100 @@ const Reports = () => {
               </div>
             </div>
 
-            {/* Detailed Table */}
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                      Bill No
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                      Patient
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                      Net Amount
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {[
-                    ...(summaryData.op_bills || []),
-                    ...(summaryData.ip_bills || [])
-                  ].map((bill: any, index: number) => (
-                    <tr key={bill.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{bill.bill_number}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full flex items-center w-16 justify-center ${bill.bill_number?.startsWith('OP')
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-purple-100 text-purple-800'
-                          }`}>
+            {/* Detailed Table / Cards */}
+            <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
+              {/* Mobile Bill Summary Cards */}
+              <div className="lg:hidden p-3 space-y-2.5">
+                {[
+                  ...(summaryData.op_bills || []),
+                  ...(summaryData.ip_bills || [])
+                ].map((bill: any) => (
+                  <div key={bill.id} className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-gray-900 text-sm">{bill.bill_number}</span>
+                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
+                          bill.bill_number?.startsWith('OP')
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-purple-100 text-purple-800'
+                        }`}>
                           {bill.bill_number?.startsWith('OP') ? 'OP' : 'IP'}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{bill.patient?.name || 'N/A'}</div>
-                        <div className="text-sm text-gray-600">{bill.patient?.phone || ''}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-gray-900">{formatSafeDate(bill.bill_date, 'dd/MM/yyyy')}</div>
-                        <div className="text-sm text-gray-600">{formatSafeDate(bill.bill_date, 'HH:mm')}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-bold text-green-700">₹{parseFloat(bill.net_amount || 0).toFixed(2)}</div>
-                      </td>
+                      </div>
+                      <span className="font-bold text-green-700 text-sm">
+                        ₹{parseFloat(bill.net_amount || 0).toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold text-gray-900 text-sm">{bill.patient?.name || 'N/A'}</div>
+                        <div className="text-gray-500 text-[11px]">{bill.patient?.phone || ''}</div>
+                      </div>
+                      <div className="text-right text-gray-500 text-[11px]">
+                        <div>{formatSafeDate(bill.bill_date, 'dd/MM/yyyy')}</div>
+                        <div>{formatSafeDate(bill.bill_date, 'HH:mm')}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Bill No
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Patient
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Net Amount
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {[
+                      ...(summaryData.op_bills || []),
+                      ...(summaryData.ip_bills || [])
+                    ].map((bill: any, index: number) => (
+                      <tr key={bill.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">{bill.bill_number}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full flex items-center w-16 justify-center ${bill.bill_number?.startsWith('OP')
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-purple-100 text-purple-800'
+                            }`}>
+                            {bill.bill_number?.startsWith('OP') ? 'OP' : 'IP'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">{bill.patient?.name || 'N/A'}</div>
+                          <div className="text-sm text-gray-600">{bill.patient?.phone || ''}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-gray-900">{formatSafeDate(bill.bill_date, 'dd/MM/yyyy')}</div>
+                          <div className="text-sm text-gray-600">{formatSafeDate(bill.bill_date, 'HH:mm')}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-bold text-green-700">₹{parseFloat(bill.net_amount || 0).toFixed(2)}</div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )
@@ -1474,73 +1653,110 @@ const Reports = () => {
               </div>
             </div>
 
-            {/* Data Table */}
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                      Patient ID
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                      Age/Gender
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                      Contact
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                      Address
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                      Registered On
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                      Type
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {patientsList.map((patient: any, index: number) => (
-                    <tr key={patient.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">
-                          {patient.is_ip ? patient.ip_number : patient.op_number}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{patient.name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-gray-900">{patient.age}</div>
-                        <div className="text-sm text-gray-600">{patient.gender}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-gray-900">{patient.phone}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-gray-900 max-w-xs truncate">
-                          {[patient.house, patient.street, patient.place].filter(Boolean).join(', ')}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-gray-900">{formatSafeDate(patient.registration_date, 'dd/MM/yyyy')}</div>
-                        <div className="text-sm text-gray-600">{formatSafeDate(patient.registration_date, 'HH:mm')}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${patient.is_ip
-                          ? 'bg-purple-100 text-purple-800'
-                          : 'bg-blue-100 text-blue-800'
-                          }`}>
-                          {patient.is_ip ? 'INPATIENT' : 'OUTPATIENT'}
-                        </span>
-                      </td>
+            {/* Data Table / Cards */}
+            <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
+              {/* Mobile Patient Cards */}
+              <div className="lg:hidden p-3 space-y-2.5">
+                {patientsList.map((patient: any) => (
+                  <div key={patient.id} className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-gray-900 text-sm">
+                        {patient.is_ip ? patient.ip_number : patient.op_number}
+                      </span>
+                      <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full ${
+                        patient.is_ip ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {patient.is_ip ? 'INPATIENT' : 'OUTPATIENT'}
+                      </span>
+                    </div>
+
+                    <div>
+                      <div className="font-semibold text-gray-900 text-sm">{patient.name}</div>
+                      <div className="text-gray-500 text-[11px]">{patient.age}y • {patient.gender} | Contact: {patient.phone || '-'}</div>
+                    </div>
+
+                    {[patient.house, patient.street, patient.place].filter(Boolean).length > 0 && (
+                      <div className="text-gray-600 bg-white p-2 rounded-lg border border-gray-100">
+                        {[patient.house, patient.street, patient.place].filter(Boolean).join(', ')}
+                      </div>
+                    )}
+
+                    <div className="text-[11px] text-gray-400 pt-1 border-t border-gray-200/60 flex items-center justify-between">
+                      <span>Registered:</span>
+                      <span>{formatSafeDate(patient.registration_date, 'dd/MM/yyyy')} {formatSafeDate(patient.registration_date, 'HH:mm')}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Patient ID
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Age/Gender
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Contact
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Address
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Registered On
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Type
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {patientsList.map((patient: any, index: number) => (
+                      <tr key={patient.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">
+                            {patient.is_ip ? patient.ip_number : patient.op_number}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">{patient.name}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-gray-900">{patient.age}</div>
+                          <div className="text-sm text-gray-600">{patient.gender}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-gray-900">{patient.phone}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-gray-900 max-w-xs truncate">
+                            {[patient.house, patient.street, patient.place].filter(Boolean).join(', ')}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-gray-900">{formatSafeDate(patient.registration_date, 'dd/MM/yyyy')}</div>
+                          <div className="text-sm text-gray-600">{formatSafeDate(patient.registration_date, 'HH:mm')}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${patient.is_ip
+                            ? 'bg-purple-100 text-purple-800'
+                            : 'bg-blue-100 text-blue-800'
+                            }`}>
+                            {patient.is_ip ? 'INPATIENT' : 'OUTPATIENT'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )

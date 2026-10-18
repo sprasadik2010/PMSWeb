@@ -385,8 +385,80 @@ const AdminPanel: React.FC = () => {
                 </div>
               </div>
 
-              {/* Table */}
-              <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
+              {/* Mobile Clinics Cards View */}
+              <div className="lg:hidden space-y-3">
+                {filteredUsers.length === 0 ? (
+                  <div className="p-6 text-center text-gray-500 bg-white rounded-2xl border border-gray-200">
+                    No clinics matched your query.
+                  </div>
+                ) : (
+                  filteredUsers.map((u) => (
+                    <div key={u.id} className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3 shadow-sm">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-bold text-gray-900 text-base">{u.full_name}</h4>
+                          <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs font-mono">@{u.username}</span>
+                        </div>
+                        {u.is_active ? (
+                          <span className="inline-flex items-center gap-1 text-emerald-600 text-xs font-bold bg-emerald-50 px-2 py-0.5 rounded-full">
+                            <CheckCircle size={12} /> Active
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-red-500 text-xs font-bold bg-red-50 px-2 py-0.5 rounded-full">
+                            <AlertCircle size={12} /> Suspended
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-100">
+                        <div>
+                          {u.subscription_tier === 'premium' ? (
+                            <span className="inline-flex items-center gap-1 text-indigo-700 font-semibold">
+                              <Sparkles size={12} className="text-amber-500" /> Premium
+                            </span>
+                          ) : (
+                            <span className="text-gray-500 font-medium">Standard</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 font-bold">
+                          <span className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded text-[11px]">{u.doctors_count}D</span>
+                          <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded text-[11px]">{u.patients_count}P</span>
+                          <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-[11px]">{u.bills_count}B</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                        <button
+                          onClick={() => toggleUserTier(u.id, u.subscription_tier)}
+                          className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer border text-center ${
+                            u.subscription_tier === 'premium'
+                              ? 'bg-white hover:bg-gray-50 border-gray-300 text-gray-700'
+                              : 'bg-indigo-600 hover:bg-indigo-700 border-indigo-600 text-white'
+                          }`}
+                        >
+                          {u.subscription_tier === 'premium' ? 'Downgrade' : 'Force Upgrade'}
+                        </button>
+                        
+                        {u.role !== 'superadmin' && (
+                          <button
+                            onClick={() => toggleUserActive(u.id, u.is_active)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer border ${
+                              u.is_active 
+                                ? 'bg-red-50 hover:bg-red-100 text-red-600 border-red-200' 
+                                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-200'
+                            }`}
+                          >
+                            {u.is_active ? 'Suspend' : 'Activate'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table */}
+              <div className="hidden lg:block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-sm">
                     <thead>

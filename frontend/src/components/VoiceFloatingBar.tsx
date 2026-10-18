@@ -71,7 +71,7 @@ export const VoiceFloatingBar: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-11/12 max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-auto">
+    <div className="hidden md:block fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-11/12 max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-auto">
       <div className="bg-gray-900/95 backdrop-blur-md text-white rounded-2xl p-3.5 shadow-2xl border border-emerald-500/30 flex items-center justify-between gap-3">
         {/* Pulsing Mic Status */}
         <div className="flex items-center gap-3 min-w-0">

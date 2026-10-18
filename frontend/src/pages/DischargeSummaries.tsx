@@ -124,25 +124,25 @@ export const DischargeSummaries: React.FC = () => {
   )
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-2.5 sm:p-6 max-w-7xl mx-auto space-y-4 sm:space-y-6">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-purple-800 via-indigo-800 to-slate-800 p-6 rounded-2xl text-white shadow-lg">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 bg-gradient-to-r from-purple-800 via-indigo-800 to-slate-800 p-4 sm:p-6 rounded-xl sm:rounded-2xl text-white shadow-lg">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="p-2 bg-white/10 backdrop-blur-md rounded-xl">
-              <FileCheck2 className="h-6 w-6 text-white" />
+            <span className="p-1.5 sm:p-2 bg-white/10 backdrop-blur-md rounded-xl">
+              <FileCheck2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </span>
-            <h1 className="text-2xl font-bold tracking-tight">Inpatient (IP) Discharge Summaries</h1>
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight">IP Discharge Summaries</h1>
           </div>
-          <p className="text-purple-100 text-sm mt-1">
+          <p className="text-purple-100 text-xs sm:text-sm mt-1 hidden sm:block">
             Clinical course documentation, hospital discharge instructions, and treatment records
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white text-purple-950 font-bold rounded-xl text-sm shadow-md hover:bg-gray-100 transition-all cursor-pointer"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-white text-purple-950 font-bold rounded-xl text-xs sm:text-sm shadow-md hover:bg-gray-100 transition-all cursor-pointer"
           >
             <Plus size={16} /> New Discharge Summary
           </button>
@@ -150,9 +150,54 @@ export const DischargeSummaries: React.FC = () => {
       </div>
 
       {/* Summaries List */}
-      <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Generated Summaries</h2>
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200/80 p-3.5 sm:p-6 shadow-sm">
+        <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Generated Summaries</h2>
+
+        {/* Mobile Summaries Cards */}
+        <div className="lg:hidden space-y-3">
+          {summaries.map(s => (
+            <div key={s.id} className="bg-gray-50/80 border border-gray-200 rounded-xl p-3.5 space-y-2.5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="font-mono font-bold text-xs text-purple-700 block">{s.summary_number}</span>
+                  <h4 className="font-bold text-gray-900 text-sm mt-0.5">{s.patient_name}</h4>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+                  {s.condition_at_discharge}
+                </span>
+              </div>
+
+              <div className="text-xs text-gray-600 space-y-1">
+                <div className="flex items-center justify-between text-gray-500">
+                  <span>Discharged: {new Date(s.discharge_date).toLocaleDateString()}</span>
+                  <span className="font-medium text-gray-700">Dr. {s.doctor_name}</span>
+                </div>
+                {s.final_diagnosis && (
+                  <p className="text-gray-700 bg-white p-2 rounded-lg border border-gray-100 italic">
+                    {s.final_diagnosis}
+                  </p>
+                )}
+              </div>
+
+              <div className="pt-2 border-t border-gray-200/60">
+                <button
+                  onClick={() => setPrintSummary(s)}
+                  className="w-full flex items-center justify-center gap-1.5 py-2 bg-purple-50 text-purple-700 rounded-lg text-xs font-bold hover:bg-purple-100 transition-colors cursor-pointer"
+                >
+                  <Printer size={13} /> View & Print Summary
+                </button>
+              </div>
+            </div>
+          ))}
+          {summaries.length === 0 && (
+            <div className="text-center py-6 text-gray-400 text-sm bg-gray-50 rounded-xl border border-dashed border-gray-200">
+              No discharge summaries recorded yet.
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Summaries Table */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-200 text-xs font-bold text-gray-500 uppercase bg-gray-50/50">

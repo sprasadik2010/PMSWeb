@@ -56,17 +56,17 @@ export const ClinicSettings: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-2.5 sm:p-6 max-w-6xl mx-auto space-y-4 sm:space-y-6">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-slate-800 via-indigo-900 to-blue-900 p-6 rounded-2xl text-white shadow-lg">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 bg-gradient-to-r from-slate-800 via-indigo-900 to-blue-900 p-4 sm:p-6 rounded-xl sm:rounded-2xl text-white shadow-lg">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="p-2 bg-white/10 backdrop-blur-md rounded-xl">
-              <Building2 className="h-6 w-6 text-white" />
+            <span className="p-1.5 sm:p-2 bg-white/10 backdrop-blur-md rounded-xl">
+              <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </span>
-            <h1 className="text-2xl font-bold tracking-tight">Hospital & Clinic Branding Profile</h1>
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight">Hospital & Clinic Profile</h1>
           </div>
-          <p className="text-slate-300 text-sm mt-1">
+          <p className="text-slate-300 text-xs sm:text-sm mt-1 hidden sm:block">
             Configure your official clinic letterhead, billing header, contact details, and tax registration
           </p>
         </div>

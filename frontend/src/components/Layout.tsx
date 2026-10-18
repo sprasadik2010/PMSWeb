@@ -264,18 +264,19 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
         {/* Top Bar */}
         <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-lg border-b border-gray-200">
           {user && !user.ad_free && (
-            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white px-4 py-2 text-center text-xs font-semibold flex items-center justify-center gap-2 shadow-inner">
-              <Sparkles size={14} className="animate-pulse text-amber-300" />
-              <span>You are running on the free sponsored tier. Go premium for an ad-free workspace and advanced features.</span>
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white px-3 py-1.5 text-center text-xs font-semibold flex items-center justify-center gap-2 shadow-inner">
+              <Sparkles size={14} className="animate-pulse text-amber-300 shrink-0" />
+              <span className="hidden sm:inline">You are running on the free sponsored tier. Go premium for an ad-free workspace.</span>
+              <span className="sm:hidden text-xs">Free sponsored tier</span>
               <button 
                 onClick={() => navigate('/upgrade')}
-                className="bg-white text-indigo-700 px-2.5 py-0.5 rounded-full hover:bg-indigo-50 transition-colors shadow-sm cursor-pointer ml-2"
+                className="bg-white text-indigo-700 px-2.5 py-0.5 rounded-full hover:bg-indigo-50 transition-colors shadow-sm cursor-pointer ml-1 text-xs shrink-0"
               >
-                Upgrade Clinic
+                Upgrade
               </button>
             </div>
           )}
-          <div className="px-6 py-4 flex items-center justify-between">
+          <div className="px-3 sm:px-6 py-2.5 sm:py-4 flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -393,7 +394,7 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-2.5 sm:p-6 overflow-auto">
           <div className="max-w-7xl mx-auto">
             {children || <Outlet />}
           </div>

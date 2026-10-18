@@ -1200,52 +1200,90 @@ const IPBillEntry = () => {
 
               {/* Search Results */}
               {showSearchResults && patients.length > 0 && (
-                <div className="mt-3 border border-gray-200 rounded max-h-60 overflow-y-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-100">
-                      <tr>
-                        <th className="px-3 py-2 text-left">IP No.</th>
-                        <th className="px-3 py-2 text-left">Name</th>
-                        <th className="px-3 py-2 text-left">Room</th>
-                        <th className="px-3 py-2 text-left">Phone</th>
-                        <th className="px-3 py-2 text-left">Complaint</th>
-                        <th className="px-3 py-2 text-left">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {patients.map(patient => (
-                        <tr key={patient.id} className="border-t hover:bg-purple-50">
-                          <td className="px-3 py-2">
-                            <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
-                              {patient.patient_number}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2">
-                            <div className="font-medium">{patient.name}</div>
-                            <div className="text-xs text-gray-500">{patient.age} • {patient.gender}</div>
-                          </td>
-                          <td className="px-3 py-2">
-                            <div className="flex items-center">
-                              <Bed className="mr-1" size={14} />
-                              {patient.room || 'N/A'}
-                            </div>
-                          </td>
-                          <td className="px-3 py-2">{patient.phone}</td>
-                          <td className="px-3 py-2">
-                            <div className="text-xs truncate max-w-xs">{patient.complaint}</div>
-                          </td>
-                          <td className="px-3 py-2">
-                            <button
-                              onClick={() => handleSelectPatient(patient)}
-                              className="px-3 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700"
-                            >
-                              Select
-                            </button>
-                          </td>
+                <div className="mt-3 border border-gray-200 rounded-xl max-h-60 overflow-y-auto">
+                  {/* Mobile Search Cards */}
+                  <div className="lg:hidden divide-y divide-gray-100 p-2 space-y-2">
+                    {patients.map(patient => (
+                      <div key={patient.id} className="p-2.5 bg-gray-50 rounded-lg space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded font-mono font-bold">
+                            IP: {patient.patient_number}
+                          </span>
+                          <button
+                            onClick={() => handleSelectPatient(patient)}
+                            className="px-3 py-1 bg-purple-600 text-white text-xs font-semibold rounded-md hover:bg-purple-700 cursor-pointer"
+                          >
+                            Select
+                          </button>
+                        </div>
+                        <div className="font-medium text-gray-900 text-sm">{patient.name}</div>
+                        <div className="text-xs text-gray-500 flex items-center justify-between">
+                          <span>{patient.age}y • {patient.gender}</span>
+                          <span className="flex items-center text-purple-700 font-medium">
+                            <Bed size={12} className="mr-1" />
+                            {patient.room || 'No Room'}
+                          </span>
+                        </div>
+                        {patient.phone && (
+                          <div className="text-xs text-gray-500">Phone: {patient.phone}</div>
+                        )}
+                        {patient.complaint && (
+                          <div className="text-xs text-gray-600 italic bg-white p-1 rounded border border-gray-100">
+                            {patient.complaint}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop Search Table */}
+                  <div className="hidden lg:block overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-3 py-2 text-left">IP No.</th>
+                          <th className="px-3 py-2 text-left">Name</th>
+                          <th className="px-3 py-2 text-left">Room</th>
+                          <th className="px-3 py-2 text-left">Phone</th>
+                          <th className="px-3 py-2 text-left">Complaint</th>
+                          <th className="px-3 py-2 text-left">Action</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {patients.map(patient => (
+                          <tr key={patient.id} className="border-t hover:bg-purple-50">
+                            <td className="px-3 py-2">
+                              <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
+                                {patient.patient_number}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="font-medium">{patient.name}</div>
+                              <div className="text-xs text-gray-500">{patient.age} • {patient.gender}</div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="flex items-center">
+                                <Bed className="mr-1" size={14} />
+                                {patient.room || 'N/A'}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">{patient.phone}</td>
+                            <td className="px-3 py-2">
+                              <div className="text-xs truncate max-w-xs">{patient.complaint}</div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <button
+                                onClick={() => handleSelectPatient(patient)}
+                                className="px-3 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700"
+                              >
+                                Select
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
 
@@ -1397,59 +1435,105 @@ const IPBillEntry = () => {
                 </div>
 
                 {/* Previous Bills List */}
-                <div className="border border-gray-200 rounded overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-3 py-2 text-left">Bill No.</th>
-                        <th className="px-3 py-2 text-left">Date</th>
-                        <th className="px-3 py-2 text-left">Room</th>
-                        <th className="px-3 py-2 text-left">Category</th>
-                        <th className="px-3 py-2 text-left">Amount</th>
-                        <th className="px-3 py-2 text-left">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {previousBills.map((bill, index) => (
-                        <tr
-                          key={bill.id}
-                          className={`border-t hover:bg-blue-50 ${currentBillIndex === index ? 'bg-blue-100' : ''
-                            }`}
-                        >
-                          <td className="px-3 py-2">
-                            <span className={`font-medium ${currentBillIndex === index ? 'text-blue-700' : 'text-gray-800'
-                              }`}>
-                              {bill.bill_number}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2">
-                            {format(new Date(bill.bill_date), 'dd/MM/yyyy')}
-                          </td>
-                          <td className="px-3 py-2">{bill.room}</td>
-                          <td className="px-3 py-2">
-                            <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">
+                <div className="border border-gray-200 rounded-xl overflow-hidden">
+                  {/* Mobile Previous Bills Cards */}
+                  <div className="lg:hidden p-2.5 space-y-2 bg-gray-50/50">
+                    {previousBills.map((bill, index) => (
+                      <div
+                        key={bill.id}
+                        className={`p-3 rounded-lg border text-xs space-y-2 ${
+                          currentBillIndex === index
+                            ? 'bg-purple-50 border-purple-300 shadow-sm'
+                            : 'bg-white border-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-purple-700">{bill.bill_number}</span>
+                          <span className="text-gray-500">{format(new Date(bill.bill_date), 'dd/MM/yyyy')}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-[11px] font-semibold">
                               {bill.category}
                             </span>
-                          </td>
-                          <td className="px-3 py-2 font-bold">
+                            {bill.room && (
+                              <span className="text-gray-500 text-[11px]">Room: {bill.room}</span>
+                            )}
+                          </div>
+                          <span className="font-bold text-gray-900 text-sm">
                             ₹{bill.net_amount.toFixed(2)}
-                          </td>
-                          <td className="px-3 py-2">
-                            <button
-                              onClick={() => handleLoadPreviousBill(index)}
-                              disabled={isLoadingBillDetails}
-                              className={`px-3 py-1 text-xs rounded disabled:opacity-50 ${currentBillIndex === index
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                            >
-                              {currentBillIndex === index ? 'Viewing' : 'View'}
-                            </button>
-                          </td>
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleLoadPreviousBill(index)}
+                          disabled={isLoadingBillDetails}
+                          className={`w-full py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer disabled:opacity-50 ${
+                            currentBillIndex === index
+                              ? 'bg-purple-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {currentBillIndex === index ? 'Currently Viewing' : 'View Bill Details'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop Previous Bills Table */}
+                  <div className="hidden lg:block overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-3 py-2 text-left">Bill No.</th>
+                          <th className="px-3 py-2 text-left">Date</th>
+                          <th className="px-3 py-2 text-left">Room</th>
+                          <th className="px-3 py-2 text-left">Category</th>
+                          <th className="px-3 py-2 text-left">Amount</th>
+                          <th className="px-3 py-2 text-left">Action</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {previousBills.map((bill, index) => (
+                          <tr
+                            key={bill.id}
+                            className={`border-t hover:bg-blue-50 ${currentBillIndex === index ? 'bg-blue-100' : ''
+                              }`}
+                          >
+                            <td className="px-3 py-2">
+                              <span className={`font-medium ${currentBillIndex === index ? 'text-blue-700' : 'text-gray-800'
+                                }`}>
+                                {bill.bill_number}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2">
+                              {format(new Date(bill.bill_date), 'dd/MM/yyyy')}
+                            </td>
+                            <td className="px-3 py-2">{bill.room}</td>
+                            <td className="px-3 py-2">
+                              <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">
+                                {bill.category}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 font-bold">
+                              ₹{bill.net_amount.toFixed(2)}
+                            </td>
+                            <td className="px-3 py-2">
+                              <button
+                                onClick={() => handleLoadPreviousBill(index)}
+                                disabled={isLoadingBillDetails}
+                                className={`px-3 py-1 text-xs rounded disabled:opacity-50 ${currentBillIndex === index
+                                  ? 'bg-blue-600 text-white'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                  }`}
+                              >
+                                {currentBillIndex === index ? 'Viewing' : 'View'}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}
@@ -1622,9 +1706,9 @@ const IPBillEntry = () => {
         {/* Bill Entry Section */}
         <div className="bg-white rounded-lg shadow border border-gray-200">
           <div className="p-3 border-b border-gray-200 bg-indigo-50">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <h2 className="font-semibold text-gray-900">Bill Entry</h2>
-              <div className="flex items-center space-x-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -1690,8 +1774,103 @@ const IPBillEntry = () => {
               </div>
             )}
 
-            {/* Bill Items Table */}
-            <div className="overflow-x-auto">
+            {/* Bill Items Responsive Cards / Table */}
+            {/* Mobile Bill Items Cards */}
+            <div className="lg:hidden space-y-3 mb-3">
+              {billItems.map((item, index) => (
+                <div key={index} className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-purple-700 bg-purple-100 px-2 py-0.5 rounded">
+                      Item #{index + 1}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-green-700 text-sm">
+                        ₹{item.total.toFixed(2)}
+                      </span>
+                      {billItems.length > billParticularsnDepts.length && (
+                        <button
+                          type="button"
+                          onClick={() => removeBillItem(index)}
+                          className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs hover:bg-red-200 cursor-pointer"
+                          title="Remove item"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-gray-500 mb-1">Particular</label>
+                    <div className="relative">
+                      <select
+                        value={item.particular}
+                        onChange={(e) => handleBillItemChange(index, 'particular', e.target.value)}
+                        className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs bg-white appearance-none pr-6"
+                      >
+                        <option value="">Select Particular</option>
+                        {particulars.map((particular) => (
+                          <option key={particular.id} value={particular.id.toString()}>
+                            {particular.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-gray-500 mb-1">Department</label>
+                    <div className="relative">
+                      <select
+                        value={item.department}
+                        onChange={(e) => handleBillItemChange(index, 'department', e.target.value)}
+                        className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs bg-white appearance-none pr-6"
+                      >
+                        <option value="">Select Department</option>
+                        {departments.map((department) => (
+                          <option key={department.id} value={department.id.toString()}>
+                            {department.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-gray-500 mb-1">Amount (₹)</label>
+                      <input
+                        type="text"
+                        value={item.amount}
+                        onChange={(e) => handleBillItemChange(index, 'amount', parseFloat(e.target.value) || 0)}
+                        className="w-full px-2 py-1 border border-gray-300 rounded-lg text-xs text-center bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-gray-500 mb-1">Disc %</label>
+                      <input
+                        type="text"
+                        value={item.discount_percent}
+                        onChange={(e) => handleBillItemChange(index, 'discount_percent', parseFloat(e.target.value) || 0)}
+                        className="w-full px-2 py-1 border border-gray-300 rounded-lg text-xs text-center bg-white"
+                        max="100"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-gray-500 mb-1">Disc Amt</label>
+                      <div className="px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-center text-red-600 font-medium">
+                        ₹{item.discount_amount.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Bill Items Table */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full border border-gray-200 text-sm">
                 <thead className="bg-gray-100">
                   <tr>

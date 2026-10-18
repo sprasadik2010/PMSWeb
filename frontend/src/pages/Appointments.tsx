@@ -148,9 +148,34 @@ export const Appointments: React.FC = () => {
   const waitingPatients = appointments.filter(a => a.status === 'waiting')
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 p-6 rounded-2xl text-white shadow-lg">
+    <div className="p-2.5 sm:p-6 max-w-7xl mx-auto space-y-4 sm:space-y-6">
+      {/* Mobile Top Header (Compact & Actionable) */}
+      <div className="flex sm:hidden items-center justify-between gap-2 bg-gradient-to-r from-emerald-700 to-teal-800 p-3 rounded-xl text-white shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="p-1.5 bg-white/10 rounded-lg">
+            <Calendar className="h-5 w-5 text-white" />
+          </span>
+          <h1 className="text-base font-bold">Appointments</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowTvMode(true)}
+            className="p-1.5 bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold rounded-lg text-xs cursor-pointer"
+            title="Waiting Room TV Mode"
+          >
+            <Tv size={16} />
+          </button>
+          <button
+            onClick={() => setShowBookModal(true)}
+            className="flex items-center gap-1 px-3 py-1.5 bg-white text-emerald-900 font-bold rounded-lg text-xs shadow-sm cursor-pointer"
+          >
+            <Plus size={15} /> Book
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop Top Banner */}
+      <div className="hidden sm:flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 p-6 rounded-2xl text-white shadow-lg">
         <div>
           <div className="flex items-center gap-2.5">
             <span className="p-2 bg-white/10 backdrop-blur-md rounded-xl">
@@ -200,8 +225,8 @@ export const Appointments: React.FC = () => {
         </div>
       )}
 
-      {/* Live Queue Cards Strip */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Live Queue Cards Strip (Hidden on Mobile) */}
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Calling Now */}
         <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
           <div className="flex justify-between items-start">
@@ -321,8 +346,77 @@ export const Appointments: React.FC = () => {
           </button>
         </div>
 
-        {/* Appointments Table */}
-        <div className="overflow-x-auto">
+        {/* Mobile Appointments Cards View */}
+        <div className="lg:hidden space-y-3">
+          {appointments.map(apt => (
+            <div key={apt.id} className="bg-gray-50/80 border border-gray-200 rounded-xl p-3.5 space-y-2.5 shadow-sm">
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-extrabold px-2 py-0.5 rounded-md bg-white border border-gray-200 text-gray-900 text-xs">
+                  #{apt.token_number}
+                </span>
+                <span className="text-xs font-semibold text-gray-600">
+                  {apt.time_slot}
+                </span>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                    apt.status === 'in_consultation'
+                      ? 'bg-blue-100 text-blue-800'
+                      : apt.status === 'waiting'
+                      ? 'bg-amber-100 text-amber-800'
+                      : apt.status === 'completed'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}
+                >
+                  {apt.status.replace('_', ' ')}
+                </span>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-gray-900 text-sm">{apt.patient_name}</h4>
+                <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
+                  <span>Phone: {apt.patient_phone || '-'}</span>
+                  <span className="font-semibold text-emerald-700">Dr. {apt.doctor_name}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-2 border-t border-gray-200/80">
+                {apt.status === 'waiting' && (
+                  <button
+                    onClick={() => handleUpdateStatus(apt.id, 'in_consultation')}
+                    className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg text-center cursor-pointer transition-colors"
+                  >
+                    Call In
+                  </button>
+                )}
+                {apt.status === 'in_consultation' && (
+                  <button
+                    onClick={() => handleUpdateStatus(apt.id, 'completed')}
+                    className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg text-center cursor-pointer transition-colors"
+                  >
+                    Complete
+                  </button>
+                )}
+                {apt.status !== 'cancelled' && apt.status !== 'completed' && (
+                  <button
+                    onClick={() => handleUpdateStatus(apt.id, 'cancelled')}
+                    className="px-3 py-1.5 text-red-600 bg-white border border-red-200 hover:bg-red-50 text-xs font-semibold rounded-lg cursor-pointer transition-colors"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+          {appointments.length === 0 && (
+            <div className="text-center py-6 text-gray-400 text-sm bg-gray-50 rounded-xl border border-dashed border-gray-200">
+              No appointments scheduled for this date.
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Appointments Table */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-200 text-xs font-bold text-gray-500 uppercase bg-gray-50/50">

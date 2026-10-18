@@ -533,22 +533,22 @@ export const Prescriptions: React.FC = () => {
   const selectedDoctor = doctors.find(d => d.id === selectedDoctorId)
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-2.5 sm:p-6 max-w-7xl mx-auto space-y-4 sm:space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-blue-700 via-indigo-700 to-teal-600 p-6 rounded-2xl text-white shadow-lg">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 bg-gradient-to-r from-blue-700 via-indigo-700 to-teal-600 p-4 sm:p-6 rounded-xl sm:rounded-2xl text-white shadow-lg">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="p-2 bg-white/10 backdrop-blur-md rounded-xl">
-              <FileText className="h-6 w-6 text-white" />
+            <span className="p-1.5 sm:p-2 bg-white/10 backdrop-blur-md rounded-xl">
+              <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </span>
-            <h1 className="text-2xl font-bold tracking-tight">Smart E-Prescription & AI Medical Scribe</h1>
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight">Smart E-Prescription & Consultation</h1>
           </div>
-          <p className="text-blue-100 text-sm mt-1">
+          <p className="text-blue-100 text-xs sm:text-sm mt-1 hidden sm:block">
             Voice-to-prescription dictation, 1-click clinical protocols, real-time drug safety, digital signature, and instant WhatsApp delivery
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="flex items-center gap-2 bg-white/10 p-1.5 rounded-xl backdrop-blur-md border border-white/20">
             <button
               onClick={() => setActiveTab('new')}
@@ -917,7 +917,95 @@ export const Prescriptions: React.FC = () => {
               ))}
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Mobile Medicine Items Card View */}
+            <div className="lg:hidden space-y-3">
+              {items.map((item, idx) => (
+                <div key={idx} className="bg-gray-50 border border-gray-200 rounded-xl p-3.5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md">
+                      Medicine #{idx + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveItem(idx)}
+                      className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                      title="Remove item"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">Medicine Name & Strength</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Paracetamol 650mg"
+                      value={item.medicine_name}
+                      onChange={e => handleItemChange(idx, 'medicine_name', e.target.value)}
+                      className="w-full border border-gray-200 bg-white rounded-lg px-2.5 py-2 text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-600 mb-1">Dosage</label>
+                      <input
+                        type="text"
+                        placeholder="1 tablet"
+                        value={item.dosage}
+                        onChange={e => handleItemChange(idx, 'dosage', e.target.value)}
+                        className="w-full border border-gray-200 bg-white rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-600 mb-1">Duration</label>
+                      <input
+                        type="text"
+                        placeholder="5 days"
+                        value={item.duration}
+                        onChange={e => handleItemChange(idx, 'duration', e.target.value)}
+                        className="w-full border border-gray-200 bg-white rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-600 mb-1">Frequency</label>
+                      <select
+                        value={item.frequency}
+                        onChange={e => handleItemChange(idx, 'frequency', e.target.value)}
+                        className="w-full border border-gray-200 bg-white rounded-lg px-2 py-1.5 text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none cursor-pointer"
+                      >
+                        <option value="1-0-1">1-0-1 (Twice daily)</option>
+                        <option value="1-1-1">1-1-1 (Thrice daily)</option>
+                        <option value="1-0-0">1-0-0 (Morning only)</option>
+                        <option value="0-0-1">0-0-1 (Night only)</option>
+                        <option value="SOS">SOS (As needed)</option>
+                        <option value="1 stat">1 STAT (Immediate)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-600 mb-1">Instructions</label>
+                      <select
+                        value={item.instruction}
+                        onChange={e => handleItemChange(idx, 'instruction', e.target.value)}
+                        className="w-full border border-gray-200 bg-white rounded-lg px-2 py-1.5 text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none cursor-pointer"
+                      >
+                        <option value="After Food">After Food</option>
+                        <option value="Before Food">Before Food</option>
+                        <option value="With Milk">With Milk</option>
+                        <option value="Empty Stomach">Empty Stomach</option>
+                        <option value="Bedtime">Bedtime</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Medicine Items Table */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-gray-200 text-xs font-bold text-gray-600 uppercase bg-gray-50/50">
@@ -1082,7 +1170,61 @@ export const Prescriptions: React.FC = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile Prescriptions Cards */}
+          <div className="lg:hidden space-y-3">
+            {pastPrescriptions.map(rx => (
+              <div key={rx.id} className="bg-gray-50/80 border border-gray-200 rounded-xl p-3.5 space-y-2.5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <span className="font-mono font-bold text-xs text-blue-700 block">{rx.prescription_number}</span>
+                    <h4 className="font-bold text-gray-900 text-sm mt-0.5">
+                      {rx.patient_name} <span className="text-xs text-gray-500 font-normal">({rx.patient_age}y/{rx.patient_gender})</span>
+                    </h4>
+                  </div>
+                  <span className="text-[11px] font-semibold text-gray-500 bg-white border border-gray-200 px-2 py-0.5 rounded">
+                    {new Date(rx.date).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div className="text-xs text-gray-600 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500 font-medium">Dr. {rx.doctor_name}</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800">
+                      {rx.items?.length || 0} meds
+                    </span>
+                  </div>
+                  {rx.diagnosis && (
+                    <p className="text-gray-700 bg-white p-2 rounded-lg border border-gray-100 italic">
+                      Dx: {rx.diagnosis}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 pt-2 border-t border-gray-200/60">
+                  <button
+                    onClick={() => setPrintRx(rx)}
+                    className="flex-1 inline-flex items-center justify-center gap-1 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold hover:bg-blue-100 transition-colors cursor-pointer"
+                  >
+                    <Printer size={13} /> Print
+                  </button>
+                  <button
+                    onClick={() => handleShareWhatsApp(rx)}
+                    className="flex-1 inline-flex items-center justify-center gap-1 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold hover:bg-emerald-100 transition-colors cursor-pointer"
+                  >
+                    <MessageSquare size={13} /> WhatsApp
+                  </button>
+                </div>
+              </div>
+            ))}
+            {pastPrescriptions.length === 0 && (
+              <div className="text-center py-6 text-gray-400 text-sm bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                No prescriptions generated yet.
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Prescriptions Table */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-gray-200 text-xs font-bold text-gray-500 uppercase bg-gray-50/50">

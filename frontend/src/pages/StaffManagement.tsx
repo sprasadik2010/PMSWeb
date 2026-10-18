@@ -97,36 +97,94 @@ export const StaffManagement: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-2.5 sm:p-6 max-w-6xl mx-auto space-y-4 sm:space-y-6">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-teal-700 via-cyan-800 to-blue-900 p-6 rounded-2xl text-white shadow-lg">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 bg-gradient-to-r from-teal-700 via-cyan-800 to-blue-900 p-4 sm:p-6 rounded-xl sm:rounded-2xl text-white shadow-lg">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="p-2 bg-white/10 backdrop-blur-md rounded-xl">
-              <Users className="h-6 w-6 text-white" />
+            <span className="p-1.5 sm:p-2 bg-white/10 backdrop-blur-md rounded-xl">
+              <Users className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </span>
-            <h1 className="text-2xl font-bold tracking-tight">Clinic Staff & Role-Based Access Control (RBAC)</h1>
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight">Clinic Staff & Roles</h1>
           </div>
-          <p className="text-teal-100 text-sm mt-1">
+          <p className="text-teal-100 text-xs sm:text-sm mt-1 hidden sm:block">
             Delegate clinical workflows: create logins for Doctors, Receptionists, Billing Clerks, and Nurses
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white text-teal-950 font-bold rounded-xl text-sm shadow-md hover:bg-gray-100 transition-all cursor-pointer"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-white text-teal-950 font-bold rounded-xl text-xs sm:text-sm shadow-md hover:bg-gray-100 transition-all cursor-pointer"
           >
             <UserPlus size={16} /> Add Staff Account
           </button>
         </div>
       </div>
 
-      {/* Staff Table */}
-      <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Clinic Team Members</h2>
+      {/* Staff Table / Cards */}
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200/80 p-3.5 sm:p-6 shadow-sm">
+        <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Clinic Team Members</h2>
 
-        <div className="overflow-x-auto">
+        {/* Mobile Staff Cards */}
+        <div className="lg:hidden space-y-3">
+          {staffList.map(member => (
+            <div key={member.id} className="bg-gray-50/80 border border-gray-200 rounded-xl p-3.5 space-y-2.5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="font-bold text-gray-900 text-sm">{member.full_name}</h4>
+                  <p className="font-mono text-xs text-blue-700 mt-0.5">@{member.username}</p>
+                </div>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                    member.role === 'doctor'
+                      ? 'bg-purple-100 text-purple-800'
+                      : member.role === 'receptionist'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : member.role === 'billing'
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-blue-100 text-blue-800'
+                  }`}
+                >
+                  {member.role}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-2 border-t border-gray-200/60">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                      member.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {member.is_active ? 'Active' : 'Disabled'}
+                  </span>
+                  <span className="text-gray-400 text-[11px]">
+                    {new Date(member.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleToggleStatus(member.id)}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
+                    member.is_active
+                      ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                      : 'bg-green-50 text-green-700 hover:bg-green-100'
+                  }`}
+                >
+                  {member.is_active ? 'Deactivate' : 'Activate'}
+                </button>
+              </div>
+            </div>
+          ))}
+          {staffList.length === 0 && (
+            <div className="text-center py-6 text-gray-400 text-sm bg-gray-50 rounded-xl border border-dashed border-gray-200">
+              No staff members added yet.
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Staff Table */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-200 text-xs font-bold text-gray-500 uppercase bg-gray-50/50">

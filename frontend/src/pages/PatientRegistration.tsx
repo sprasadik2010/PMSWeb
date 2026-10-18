@@ -297,29 +297,36 @@ const PatientRegistration = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header with Stats - Matching DoctorMaster */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+      {/* Header with Stats */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3.5 sm:p-6 border border-blue-100">
+        <div className="flex items-center justify-between gap-2 mb-2 sm:mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-              <UserPlus className="mr-3 text-blue-600 shrink-0" size={28} />
-              <span>Patient Registration</span>
-            </h1>
-            <p className="text-gray-600 mt-1 text-sm">Register new patients for outpatient or inpatient services</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900 flex items-center">
+                <UserPlus className="mr-2 sm:mr-3 text-blue-600 shrink-0" size={22} />
+                <span>Patient Registration</span>
+              </h1>
+              {/* Show OP/IP number badge on mobile directly in header */}
+              <span className="sm:hidden font-mono text-xs font-black px-2 py-0.5 rounded-lg bg-blue-600 text-white shadow-sm">
+                {isIP ? 'IP' : 'OP'} #{patientNumber}
+              </span>
+            </div>
+            <p className="text-gray-600 mt-1 text-sm hidden sm:block">Register new patients for outpatient or inpatient services</p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 sm:px-4 py-2 rounded-xl shadow-md text-sm font-medium"
+              className="flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl shadow-md text-xs sm:text-sm font-medium cursor-pointer"
             >
-              <X size={18} className="mr-1.5" />
+              <X size={16} className="mr-1" />
               <span>Dashboard</span>
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Stat Cards - Hidden on Mobile to prevent unnecessary scrolling */}
+        <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg mr-3">
