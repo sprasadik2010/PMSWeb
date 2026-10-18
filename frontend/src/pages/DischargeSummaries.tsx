@@ -7,7 +7,6 @@ import {
   Printer,
   X
 } from 'lucide-react'
-import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface DischargeSummary {
   id: number
@@ -141,7 +140,6 @@ export const DischargeSummaries: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <VoiceSwitch compact label="Voice Typing" />
           <button
             onClick={() => setShowCreateModal(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-white text-purple-950 font-bold rounded-xl text-sm shadow-md hover:bg-gray-100 transition-all cursor-pointer"
@@ -208,12 +206,9 @@ export const DischargeSummaries: React.FC = () => {
           <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-gray-200 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 border-b pb-3">
               <h2 className="text-lg font-bold text-gray-900">Prepare Inpatient Discharge Summary</h2>
-              <div className="flex items-center gap-2">
-                <VoiceSwitch compact label="Voice" />
-                <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-gray-600">
-                  <X size={20} />
-                </button>
-              </div>
+              <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={20} />
+              </button>
             </div>
 
             <form onSubmit={handleCreate} className="space-y-4">

@@ -6,7 +6,6 @@ import {
   UserPlus,
   X
 } from 'lucide-react'
-import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface StaffMember {
   id: number
@@ -114,7 +113,6 @@ export const StaffManagement: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <VoiceSwitch compact label="Voice Typing" />
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-white text-teal-950 font-bold rounded-xl text-sm shadow-md hover:bg-gray-100 transition-all cursor-pointer"
@@ -204,12 +202,9 @@ export const StaffManagement: React.FC = () => {
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200">
             <div className="flex justify-between items-center mb-4 border-b pb-3">
               <h2 className="text-lg font-bold text-gray-900">Create Staff Login</h2>
-              <div className="flex items-center gap-2">
-                <VoiceSwitch compact label="Voice" />
-                <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600">
-                  <X size={20} />
-                </button>
-              </div>
+              <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={20} />
+              </button>
             </div>
 
             <form onSubmit={handleAddStaff} className="space-y-4">

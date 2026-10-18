@@ -23,7 +23,6 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react'
-import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface UserAdmin {
   id: number
@@ -235,7 +234,6 @@ const AdminPanel: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <VoiceSwitch compact label="Voice Typing" />
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 hidden md:block">
             <p className="text-xs text-rose-200">Security Clearance</p>
             <p className="text-sm font-bold">ROOT SUPERADMIN</p>
@@ -385,7 +383,6 @@ const AdminPanel: React.FC = () => {
                     className="w-full bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400"
                   />
                 </div>
-                <VoiceSwitch compact label="Voice Search" />
               </div>
 
               {/* Table */}

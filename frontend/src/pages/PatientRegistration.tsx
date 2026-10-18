@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
 import { Save, X, Search, Trash2, User, Phone, MapPin, /*CalendarClock,*/ Building, FileText, UserCheck, /*Home,*/ Clock, Users, Eye, Loader2, Bed, Stethoscope, Calendar, /*AlertCircle, FileEdit,*/ UserPlus } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import type { AxiosError } from 'axios'
-import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface Doctor {
   id: number
@@ -149,8 +148,13 @@ const PatientRegistration = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.name || !formData.age || !formData.gender || !formData.complaint || !formData.phone || !formData.doctor_id) {
-      toast.error('Please fill required fields')
+    if (!formData.name || !formData.age || !formData.gender || !formData.complaint || !formData.phone) {
+      toast.error('Please fill required patient fields')
+      return
+    }
+
+    if (!formData.doctor_id || formData.doctor_id === 0) {
+      toast.error('Please select a consulting doctor (or add a doctor in Doctor Master first)')
       return
     }
 
@@ -305,7 +309,6 @@ const PatientRegistration = () => {
             <p className="text-gray-600 mt-1 text-sm">Register new patients for outpatient or inpatient services</p>
           </div>
           <div className="flex items-center gap-2">
-            <VoiceSwitch compact label="Voice Typing" />
             <button
               onClick={() => navigate('/dashboard')}
               className="flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 sm:px-4 py-2 rounded-xl shadow-md text-sm font-medium"
@@ -409,7 +412,6 @@ const PatientRegistration = () => {
             
             {/* Search Patients Section */}
             <div className="flex flex-wrap items-center gap-2">
-              <VoiceSwitch compact label="Voice Typing" />
               <div className="relative flex-1 sm:w-64 min-w-[180px]">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <input
@@ -559,6 +561,27 @@ const PatientRegistration = () => {
           </div>
         )}
 
+        {/* No Doctors Alert Banner */}
+        {doctors.length === 0 && !isLoading && (
+          <div className="mx-6 mt-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="p-2.5 bg-amber-100 rounded-xl text-amber-700">
+                <Stethoscope size={22} />
+              </span>
+              <div>
+                <p className="font-semibold text-sm">No consulting doctors registered yet</p>
+                <p className="text-xs text-amber-700 mt-0.5">Every patient registration requires an assigned consulting doctor. Please add a doctor first.</p>
+              </div>
+            </div>
+            <Link
+              to="/doctors"
+              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs whitespace-nowrap shadow-md transition-all cursor-pointer"
+            >
+              + Add Doctor in Doctor Master
+            </Link>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
           {/* Basic Information */}
           <div className="space-y-4">
@@ -702,21 +725,42 @@ const PatientRegistration = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-900">
-                  Consulting Doctor *
-                </label>
-                <select
-                  value={formData.doctor_id}
-                  onChange={(e) => setFormData({ ...formData, doctor_id: parseInt(e.target.value) })}
-                  className="input-field px-2 py-1.5 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
-                  required
-                >
-                  {Array.isArray(doctors) && doctors.map((doctor) => (
-                    <option key={doctor.id} value={doctor.id}>
-                      {doctor.name} ({doctor.code})
-                    </option>
-                  ))}
-                </select>
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-gray-900">
+                    Consulting Doctor *
+                  </label>
+                  {doctors.length > 0 && (
+                    <span className="text-xs text-gray-500">{doctors.length} available</span>
+                  )}
+                </div>
+                {doctors.length === 0 ? (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold">No doctors found</p>
+                      <p className="text-amber-700 text-[11px] mt-0.5">Please add a doctor first to register patients.</p>
+                    </div>
+                    <Link
+                      to="/doctors"
+                      className="ml-3 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg text-xs whitespace-nowrap shadow-sm cursor-pointer"
+                    >
+                      + Add Doctor
+                    </Link>
+                  </div>
+                ) : (
+                  <select
+                    value={formData.doctor_id}
+                    onChange={(e) => setFormData({ ...formData, doctor_id: parseInt(e.target.value) })}
+                    className="input-field px-2 py-1.5 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                    required
+                  >
+                    <option value="">-- Select Consulting Doctor --</option>
+                    {Array.isArray(doctors) && doctors.map((doctor) => (
+                      <option key={doctor.id} value={doctor.id}>
+                        {doctor.name} ({doctor.code})
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -769,7 +813,7 @@ const PatientRegistration = () => {
             </button>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || doctors.length === 0}
               className={`w-full sm:w-auto px-6 py-2.5 text-white font-medium rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-md cursor-pointer ${
                 isIP 
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700' 

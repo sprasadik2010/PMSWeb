@@ -4,7 +4,6 @@ import { Download, Filter, Calendar, Printer, FileText, BarChart3, Users, Credit
 import toast from 'react-hot-toast'
 import { format, isValid, parseISO } from 'date-fns'
 import { appConfig } from '../config/appConfig';
-import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface Particular {
   id: number;
@@ -1567,7 +1566,6 @@ const Reports = () => {
             <p className="text-blue-100 mt-2 text-base sm:text-lg">Comprehensive hospital analytics and reporting</p>
           </div>
           <div className="flex items-center gap-4">
-            <VoiceSwitch compact label="Voice Typing" />
             <div className="text-right hidden sm:block">
               <p className="text-blue-100 text-sm">Last Updated</p>
               <p className="text-white font-medium">{format(new Date(), 'dd/MM/yyyy hh:mm a')}</p>

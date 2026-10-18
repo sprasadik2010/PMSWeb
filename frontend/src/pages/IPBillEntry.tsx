@@ -5,7 +5,6 @@ import { X, Search, Building, CalendarClock, Bed, Loader2, Users, ChevronDown, C
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import type { AxiosError } from 'axios'
-import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface BillItem {
   particular: string  // This stores the particular ID (as string)
@@ -1143,7 +1142,6 @@ const IPBillEntry = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <VoiceSwitch compact label="Voice Typing" />
             <button
               onClick={() => navigate('/dashboard')}
               className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded text-sm cursor-pointer"
@@ -1166,7 +1164,6 @@ const IPBillEntry = () => {
                     <Search className="mr-2" size={18} />
                     Search IP Patient
                   </h2>
-                  <VoiceSwitch compact label="Voice Search" />
                 </div>
                 <button
                   onClick={() => setShowSearchResults(!showSearchResults)}

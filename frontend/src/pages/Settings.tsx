@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Settings, Plus, Trash2, Building, Tag, X, RefreshCw, Check } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { VoiceSwitch } from '../components/VoiceFloatingBar';
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
 
@@ -182,7 +181,6 @@ const SettingsPage: React.FC = () => {
               <p className="text-gray-600 mt-1 text-sm">Manage departments and particulars</p>
             </div>
             <div className="flex items-center gap-3">
-              <VoiceSwitch compact label="Voice Typing" />
               <button
                 onClick={loadData}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 cursor-pointer text-sm font-medium"

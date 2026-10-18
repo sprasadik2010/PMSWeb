@@ -5,22 +5,40 @@ from typing import List, Optional
 from datetime import datetime
 
 from database import get_db
-from .auth import get_current_user
+from .auth import get_current_user, get_tenant_id
 from ..models import Base, Department, Particular
 from ..schemas import DepartmentCreate, DepartmentResponse, ParticularCreate, ParticularResponse #, ParticularUpdate
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
-# Departments CRUD (unchanged)
+DEFAULT_DEPARTMENTS = [
+    "General Medicine",
+    "Cardiology",
+    "Pediatrics",
+    "Orthopedics",
+    "Gynecology & Obstetrics",
+    "ENT",
+    "Dermatology",
+    "General Surgery"
+]
+
+# Departments CRUD
 @router.get("/departments", response_model=List[DepartmentResponse])
 async def get_departments(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
     """
-    Get all departments
+    Get all departments (auto-seeds standard defaults if clinic has none)
     """
-    return db.query(Department).filter(Department.user_id == current_user.id).order_by(Department.name).all()
+    tenant_id = get_tenant_id(current_user)
+    depts = db.query(Department).filter(Department.user_id == tenant_id).order_by(Department.name).all()
+    if not depts:
+        for name in DEFAULT_DEPARTMENTS:
+            db.add(Department(name=name, user_id=tenant_id))
+        db.commit()
+        depts = db.query(Department).filter(Department.user_id == tenant_id).order_by(Department.name).all()
+    return depts
 
 @router.post("/departments", response_model=DepartmentResponse)
 async def create_department(
@@ -31,12 +49,13 @@ async def create_department(
     """
     Create a new department
     """
+    tenant_id = get_tenant_id(current_user)
     # Check if department with same name exists for this user
-    existing = db.query(Department).filter(Department.name == department.name, Department.user_id == current_user.id).first()
+    existing = db.query(Department).filter(Department.name == department.name, Department.user_id == tenant_id).first()
     if existing:
         raise HTTPException(status_code=400, detail="Department already exists")
     
-    db_department = Department(name=department.name, user_id=current_user.id)
+    db_department = Department(name=department.name, user_id=tenant_id)
     db.add(db_department)
     db.commit()
     db.refresh(db_department)
@@ -51,7 +70,8 @@ async def delete_department(
     """
     Delete a department
     """
-    db_department = db.query(Department).filter(Department.id == department_id, Department.user_id == current_user.id).first()
+    tenant_id = get_tenant_id(current_user)
+    db_department = db.query(Department).filter(Department.id == department_id, Department.user_id == tenant_id).first()
     if not db_department:
         raise HTTPException(status_code=404, detail="Department not found")
     

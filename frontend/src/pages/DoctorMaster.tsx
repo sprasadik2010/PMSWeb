@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Save, Trash2, Plus, Edit, X, Search, Phone, Mail, Clock, BriefcaseMedical, Stethoscope, User } from 'lucide-react'
+import { Save, Trash2, Plus, Edit, X, Search, Phone, Mail, Clock, BriefcaseMedical, Stethoscope, User, Building } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface Department{  
   id?: number
@@ -42,6 +41,11 @@ const DoctorMaster = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [showForm, setShowForm] = useState(false)
 
+  // Quick Add Department state
+  const [showQuickDeptModal, setShowQuickDeptModal] = useState(false)
+  const [quickDeptName, setQuickDeptName] = useState('')
+  const [isAddingDept, setIsAddingDept] = useState(false)
+
   useEffect(() => {
     fetchDepartments()
     fetchDoctors()
@@ -54,7 +58,7 @@ const [formData, setFormData] = useState<Doctor>({
     phone: '',
     email: '',
     specialty: '',
-    department: String(departments.at(0)?.id),
+    department: '',
     op_validity: 30,
     booking_code: '',
     max_tokens: 50,
@@ -98,11 +102,31 @@ const [formData, setFormData] = useState<Doctor>({
     return `DR${random}`
   }
 
+  const handleQuickAddDepartment = async () => {
+    if (!quickDeptName.trim()) {
+      toast.error('Please enter a department name')
+      return
+    }
+    setIsAddingDept(true)
+    try {
+      const res = await axios.post('/settings/departments', { name: quickDeptName.trim() })
+      toast.success(`Department "${res.data.name}" added`)
+      setQuickDeptName('')
+      setShowQuickDeptModal(false)
+      await fetchDepartments()
+      setFormData(prev => ({ ...prev, department: res.data.name }))
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Failed to add department')
+    } finally {
+      setIsAddingDept(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.code || !formData.name || !formData.specialty || !formData.department) {
-      toast.error('Please fill required fields')
+    if (!formData.code || !formData.name || !formData.specialty || !formData.department || formData.department === '0') {
+      toast.error('Please fill required fields and select a valid department')
       return
     }
 
@@ -292,7 +316,6 @@ const [formData, setFormData] = useState<Doctor>({
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <VoiceSwitch compact label="Voice Typing" />
                 <button
                   type="button"
                   onClick={resetForm}
@@ -377,22 +400,47 @@ const [formData, setFormData] = useState<Doctor>({
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-900">
-                    Department *
-                  </label>
-                  <select
-                    value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: String(e.target.value) })}
-                    className="input-field px-2 py-1.5 border-gray-300 focus:border-green-500 focus:ring-green-500"
-                    required
-                  >
-                    <option value="0">Please select a department</option>
-                    {departments.map((dept) => (
-                      <option key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-sm font-medium text-gray-900">
+                      Department *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowQuickDeptModal(true)}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center hover:underline cursor-pointer"
+                    >
+                      <Plus size={14} className="mr-0.5" /> + Quick Add Dept
+                    </button>
+                  </div>
+                  {departments.length === 0 ? (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold">No departments found</p>
+                        <p className="text-amber-700 mt-0.5">Add a department before adding doctors.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowQuickDeptModal(true)}
+                        className="ml-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-xs whitespace-nowrap shadow-sm flex items-center cursor-pointer"
+                      >
+                        <Plus size={14} className="mr-1" /> Add Dept
+                      </button>
+                    </div>
+                  ) : (
+                    <select
+                      value={formData.department}
+                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                      className="input-field px-2 py-1.5 border-gray-300 focus:border-green-500 focus:ring-green-500"
+                      required
+                    >
+                      <option value="">-- Please select a department --</option>
+                      {departments.map((dept) => (
+                        <option key={dept.id} value={dept.name}>
+                          {dept.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               </div>
             </div>
@@ -651,6 +699,70 @@ const [formData, setFormData] = useState<Doctor>({
         </div>
       )}
 
+      {/* Quick Add Department Modal */}
+      {showQuickDeptModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-gray-100">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="font-bold text-gray-900 text-base flex items-center">
+                <Building className="mr-2 text-blue-600" size={20} />
+                Add New Department
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowQuickDeptModal(false)
+                  setQuickDeptName('')
+                }}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
+                Department Name *
+              </label>
+              <input
+                type="text"
+                value={quickDeptName}
+                onChange={(e) => setQuickDeptName(e.target.value)}
+                placeholder="e.g. Cardiology, Pediatrics, ENT"
+                className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    handleQuickAddDepartment()
+                  }
+                }}
+              />
+              <p className="text-xs text-gray-500 mt-1">This will be added to your hospital settings immediately.</p>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowQuickDeptModal(false)
+                  setQuickDeptName('')
+                }}
+                className="px-3.5 py-2 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isAddingDept || !quickDeptName.trim()}
+                onClick={handleQuickAddDepartment}
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-medium rounded-xl disabled:opacity-50 shadow-md flex items-center cursor-pointer"
+              >
+                {isAddingDept ? 'Saving...' : 'Save & Select'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Doctor List Section */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-200">
         <div className="p-4 sm:p-6 border-b border-gray-200">
@@ -660,7 +772,6 @@ const [formData, setFormData] = useState<Doctor>({
               <p className="text-gray-600 mt-1 text-sm">Search and manage all hospital doctors</p>
             </div>
             <div className="flex items-center gap-3">
-              <VoiceSwitch compact label="Voice Search" />
               <div className="text-sm font-semibold text-gray-700 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100">
                 Total: <span className="text-blue-600 font-bold">{filteredDoctors.length}</span> doctors
               </div>

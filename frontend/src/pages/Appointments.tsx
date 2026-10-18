@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import {
@@ -11,7 +12,6 @@ import {
   Bell,
   X
 } from 'lucide-react'
-import { VoiceSwitch } from '../components/VoiceFloatingBar'
 
 interface Appointment {
   id: number
@@ -164,7 +164,6 @@ export const Appointments: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <VoiceSwitch compact label="Voice Typing" />
           <button
             onClick={() => setShowTvMode(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold rounded-xl text-sm shadow-md transition-all cursor-pointer"
@@ -179,6 +178,27 @@ export const Appointments: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* No Doctors Alert Banner */}
+      {doctors.length === 0 && !loading && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="p-2.5 bg-amber-100 rounded-xl text-amber-700">
+              <Stethoscope size={22} />
+            </span>
+            <div>
+              <p className="font-semibold text-sm">No doctors registered in your clinic yet</p>
+              <p className="text-xs text-amber-700 mt-0.5">You need to add at least one doctor before scheduling appointments.</p>
+            </div>
+          </div>
+          <Link
+            to="/doctors"
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs whitespace-nowrap shadow-md transition-all cursor-pointer"
+          >
+            + Add Doctor in Doctor Master
+          </Link>
+        </div>
+      )}
 
       {/* Live Queue Cards Strip */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -402,7 +422,6 @@ export const Appointments: React.FC = () => {
                   <label className="block text-xs font-bold text-gray-700 uppercase">
                     Patient <span className="text-red-500">*</span>
                   </label>
-                  <VoiceSwitch compact label="Voice" />
                 </div>
                 <div className="relative">
                   <input
@@ -433,22 +452,59 @@ export const Appointments: React.FC = () => {
                     </div>
                   )}
                 </div>
+                {patients.length === 0 && (
+                  <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold">No patients registered yet</p>
+                      <p className="text-blue-700 text-[11px] mt-0.5">Please register a patient first.</p>
+                    </div>
+                    <Link
+                      to="/patients/register"
+                      className="ml-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-xs whitespace-nowrap shadow-sm"
+                    >
+                      + Register
+                    </Link>
+                  </div>
+                )}
               </div>
 
               {/* Doctor */}
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                  Doctor <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={selectedDoctorId}
-                  onChange={e => setSelectedDoctorId(Number(e.target.value))}
-                  className="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                >
-                  {doctors.map(d => (
-                    <option key={d.id} value={d.id}>{d.name} ({d.specialty})</option>
-                  ))}
-                </select>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-gray-700 uppercase">
+                    Doctor <span className="text-red-500">*</span>
+                  </label>
+                  {doctors.length > 0 && (
+                    <span className="text-xs text-gray-400">{doctors.length} available</span>
+                  )}
+                </div>
+
+                {doctors.length === 0 ? (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold">No doctors registered yet</p>
+                      <p className="text-amber-700 text-[11px] mt-0.5">Please add a doctor first to book appointments.</p>
+                    </div>
+                    <Link
+                      to="/doctors"
+                      className="ml-3 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg text-xs whitespace-nowrap shadow-sm"
+                    >
+                      + Add Doctor
+                    </Link>
+                  </div>
+                ) : (
+                  <select
+                    value={selectedDoctorId}
+                    onChange={e => setSelectedDoctorId(Number(e.target.value))}
+                    className="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    required
+                  >
+                    <option value="">-- Select Doctor --</option>
+                    {doctors.map(d => (
+                      <option key={d.id} value={d.id}>{d.name} ({d.specialty})</option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {/* Date & Time Slot */}
@@ -507,7 +563,8 @@ export const Appointments: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md"
+                  disabled={doctors.length === 0 || patients.length === 0}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-md transition-all cursor-pointer"
                 >
                   Confirm Booking
                 </button>

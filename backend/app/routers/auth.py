@@ -11,7 +11,7 @@ import os
 
 from database import get_db
 from ..schemas import Token, UserCreate, UserResponse
-from ..models import User
+from ..models import User, Department
 
 # Configuration
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production")
@@ -129,6 +129,21 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    
+    # Auto-seed standard departments for the new clinic account
+    default_departments = [
+        "General Medicine",
+        "Cardiology",
+        "Pediatrics",
+        "Orthopedics",
+        "Gynecology & Obstetrics",
+        "ENT",
+        "Dermatology",
+        "General Surgery"
+    ]
+    for d_name in default_departments:
+        db.add(Department(name=d_name, user_id=db_user.id))
+    db.commit()
     
     return {"message": "User created successfully !"}
 

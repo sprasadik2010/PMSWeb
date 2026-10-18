@@ -5,7 +5,7 @@ import random
 
 from typing import Optional
 from database import get_db
-from .auth import get_current_user
+from .auth import get_current_user, get_tenant_id
 from ..models import Doctor
 from ..schemas import DoctorCreate, DoctorResponse
 
@@ -21,12 +21,13 @@ async def create_doctor(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
+    tenant_id = get_tenant_id(current_user)
     # Check if doctor code already exists for this tenant
-    existing_doctor = db.query(Doctor).filter(Doctor.code == doctor_data.code, Doctor.user_id == current_user.id).first()
+    existing_doctor = db.query(Doctor).filter(Doctor.code == doctor_data.code, Doctor.user_id == tenant_id).first()
     if existing_doctor:
         raise HTTPException(status_code=400, detail="Doctor code already exists")
     
-    db_doctor = Doctor(**doctor_data.dict(), user_id=current_user.id)
+    db_doctor = Doctor(**doctor_data.dict(), user_id=tenant_id)
     db.add(db_doctor)
     db.commit()
     db.refresh(db_doctor)
@@ -42,7 +43,8 @@ async def get_doctors(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    query = db.query(Doctor).filter(Doctor.user_id == current_user.id)
+    tenant_id = get_tenant_id(current_user)
+    query = db.query(Doctor).filter(Doctor.user_id == tenant_id)
     
     if search:
         query = query.filter(
@@ -63,7 +65,8 @@ async def get_doctor(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    doctor = db.query(Doctor).filter(Doctor.id == doctor_id, Doctor.user_id == current_user.id).first()
+    tenant_id = get_tenant_id(current_user)
+    doctor = db.query(Doctor).filter(Doctor.id == doctor_id, Doctor.user_id == tenant_id).first()
     if not doctor:
         raise HTTPException(status_code=404, detail="Doctor not found")
     
@@ -76,7 +79,8 @@ async def update_doctor(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    doctor = db.query(Doctor).filter(Doctor.id == doctor_id, Doctor.user_id == current_user.id).first()
+    tenant_id = get_tenant_id(current_user)
+    doctor = db.query(Doctor).filter(Doctor.id == doctor_id, Doctor.user_id == tenant_id).first()
     if not doctor:
         raise HTTPException(status_code=404, detail="Doctor not found")
     
@@ -94,7 +98,8 @@ async def delete_doctor(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    doctor = db.query(Doctor).filter(Doctor.id == doctor_id, Doctor.user_id == current_user.id).first()
+    tenant_id = get_tenant_id(current_user)
+    doctor = db.query(Doctor).filter(Doctor.id == doctor_id, Doctor.user_id == tenant_id).first()
     if not doctor:
         raise HTTPException(status_code=404, detail="Doctor not found")
     

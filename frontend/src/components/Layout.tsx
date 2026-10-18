@@ -13,7 +13,6 @@ import {
   BarChart3,
   Settings,
   ChevronRight,
-  ChevronLeft,
   User,
   MoreVertical,
   ShieldCheck,
@@ -32,7 +31,7 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
 
@@ -141,7 +140,7 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
 
   const handleNavigation = (path: string) => {
     navigate(path)
-    setIsSidebarOpen(true)
+    setIsSidebarOpen(false)
   }
 
   const getGreeting = () => {
@@ -153,10 +152,10 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
-      {/* Mobile Sidebar Overlay */}
+      {/* Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -184,11 +183,10 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
         </div>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar Drawer */}
       <aside className={`
-        fixed inset-y-0 left-0 z-40 w-80 bg-gradient-to-b from-blue-900 to-indigo-900 shadow-2xl transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-50 w-80 bg-gradient-to-b from-blue-900 to-indigo-900 shadow-2xl transform transition-transform duration-300 ease-in-out
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
-        lg:relative lg:translate-x-0 lg:flex-shrink-0
       `}>
         <div className="h-full flex flex-col">
           {/* Logo */}
@@ -205,7 +203,8 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
               </div>
               <button
                 onClick={() => setIsSidebarOpen(false)}
-                className="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg"
+                className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                title="Close menu"
               >
                 <X size={20} />
               </button>
@@ -280,9 +279,10 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="p-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all shadow-sm"
+                className="p-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all shadow-sm cursor-pointer"
+                title={isSidebarOpen ? "Close menu" : "Open menu"}
               >
-                {isSidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
+                {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
               
               <div className="hidden lg:block">

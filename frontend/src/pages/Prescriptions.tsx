@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import QRCode from 'qrcode'
-import { VoiceSwitch } from '../components/VoiceFloatingBar'
 import {
   FileText,
   Plus,
@@ -550,7 +549,6 @@ export const Prescriptions: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <VoiceSwitch compact label="Voice Typing" />
           <div className="flex items-center gap-2 bg-white/10 p-1.5 rounded-xl backdrop-blur-md border border-white/20">
             <button
               onClick={() => setActiveTab('new')}
