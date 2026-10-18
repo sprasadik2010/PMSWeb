@@ -38,6 +38,7 @@ function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="patient/registration" element={<PatientRegistration />} />
               <Route path="doctor/master" element={<DoctorMaster />} />
+              <Route path="doctors" element={<Navigate to="/doctor/master" replace />} />
               <Route path="billing/op" element={<OPBillEntry />} />
               <Route path="billing/ip" element={<IPBillEntry />} />
               <Route path="prescriptions" element={<Prescriptions />} />
@@ -51,6 +52,8 @@ function App() {
               <Route path="admin" element={<AdminPanel />} />
               <Route path="select-patient" element={<SelectPatient />} />
             </Route>
+            {/* Catch-all fallback route */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </AuthProvider>
       </VoiceProvider>

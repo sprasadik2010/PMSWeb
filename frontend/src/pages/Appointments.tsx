@@ -217,7 +217,7 @@ export const Appointments: React.FC = () => {
             </div>
           </div>
           <Link
-            to="/doctors"
+            to="/doctor/master"
             className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs whitespace-nowrap shadow-md transition-all cursor-pointer"
           >
             + Add Doctor in Doctor Master
@@ -580,7 +580,7 @@ export const Appointments: React.FC = () => {
                       <p className="text-amber-700 text-[11px] mt-0.5">Please add a doctor first to book appointments.</p>
                     </div>
                     <Link
-                      to="/doctors"
+                      to="/doctor/master"
                       className="ml-3 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg text-xs whitespace-nowrap shadow-sm"
                     >
                       + Add Doctor
